@@ -26,7 +26,6 @@ contract CakeLifecycleRegistryTest {
 
         registry.createRecord(batchId, uri);
 
-        // Tuple 解构：跳过 createdAt，只取我们关心的字段
         (, address baker, , , , uint8 status, string memory metadataURI) = registry.getRecord(batchId);
 
         Assert.equal(baker,       address(this),         "baker should be this contract");
