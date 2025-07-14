@@ -38,11 +38,6 @@ function beforeAll() public {
         Assert.equal(rm.hasRole(alice, WAREHOUSE), true, "Alice should have WAREHOUSE_ROLE");
     }
 
-    /// hasRole returns false for ungranted roles
-    function testHasRoleFalse() public {
-        bytes32 REGULATOR = rm.REGULATOR_ROLE();
-        Assert.equal(rm.hasRole(bob, REGULATOR), false, "Bob should not have REGULATOR_ROLE");
-    }
 
     /// Revoke AUDITOR_ROLE from Bob
     function testRevokeRole() public {

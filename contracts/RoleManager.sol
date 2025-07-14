@@ -9,9 +9,8 @@ contract RoleManager is AccessControl {
     bytes32 public constant BAKER_ROLE     = keccak256("BAKER_ROLE");       // Cake factory
     bytes32 public constant SHIPPER_ROLE   = keccak256("SHIPPER_ROLE");     // Shipper
     bytes32 public constant WAREHOUSE_ROLE = keccak256("WAREHOUSE_ROLE");   // Warehouse
-    bytes32 public constant REGULATOR_ROLE = keccak256("REGULATOR_ROLE");   // Regulator/arbiter
     bytes32 public constant ORACLE_ROLE    = keccak256("ORACLE_ROLE");      // Sensor oracle
-    bytes32 public constant AUDITOR_ROLE   = keccak256("AUDITOR_ROLE");     // Post‐delivery auditor
+    bytes32 public constant AUDITOR_ROLE   = keccak256("AUDITOR_ROLE");     // auditor
 
     constructor(address admin) {
         // Grant the deployer or designated admin the ADMIN_ROLE
