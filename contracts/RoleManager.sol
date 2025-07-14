@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract RoleManager is AccessControl {
+    bytes32 public constant ADMIN_ROLE     = DEFAULT_ADMIN_ROLE;
     bytes32 public constant BAKER_ROLE     = keccak256("BAKER_ROLE");
     bytes32 public constant SHIPPER_ROLE   = keccak256("SHIPPER_ROLE");
     bytes32 public constant WAREHOUSE_ROLE = keccak256("WAREHOUSE_ROLE");
@@ -12,28 +13,28 @@ contract RoleManager is AccessControl {
     bytes32 public constant ORACLE_ROLE    = keccak256("ORACLE_ROLE");
 
     constructor(address admin) {
-        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(ADMIN_ROLE, admin);
     }
 
-    function grantRoleTo(bytes32 role, address account) 
-        external 
-        onlyRole(DEFAULT_ADMIN_ROLE) 
+    function grantRole(address who, bytes32 role)
+        external
+        onlyRole(ADMIN_ROLE)
     {
-        _grantRole(role, account);
+        _grantRole(role, who);
     }
 
-    function revokeRoleFrom(bytes32 role, address account) 
-        external 
-        onlyRole(DEFAULT_ADMIN_ROLE) 
+    function revokeRole(address who, bytes32 role)
+        external
+        onlyRole(ADMIN_ROLE)
     {
-        _revokeRole(role, account);
+        _revokeRole(role, who);
     }
 
-    function hasRoleFor(bytes32 role, address account) 
-        external 
-        view 
-        returns (bool) 
+    function hasRole(address who, bytes32 role)
+        external
+        view
+        returns (bool)
     {
-        return hasRole(role, account);
+        return hasRole(role, who);
     }
 }

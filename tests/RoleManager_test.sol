@@ -9,35 +9,33 @@ contract RoleManagerTest {
     address admin = address(this);
     address alice = address(0x123);
 
-
     function beforeAll() public {
         rm = new RoleManager(admin);
     }
 
-
-    function testAdminRole() public {
-        bytes32 ADMIN = rm.DEFAULT_ADMIN_ROLE();
+    function testAdminRoleExists() public {
+        bytes32 ADMIN = rm.ADMIN_ROLE();
         Assert.equal(
-            rm.hasRoleFor(ADMIN, admin),
+            rm.hasRole(admin, ADMIN),
             true,
-            "Admin should have default role"
+            "Admin should have ADMIN_ROLE"
         );
     }
 
     function testGrantAndRevoke() public {
         bytes32 BAKER = rm.BAKER_ROLE();
-        rm.grantRoleTo(BAKER, alice);
+        rm.grantRole(alice, BAKER);
         Assert.equal(
-            rm.hasRoleFor(BAKER, alice),
+            rm.hasRole(alice, BAKER),
             true,
-            "Grant role failed"
+            "Alice should have BAKER_ROLE"
         );
 
-        rm.revokeRoleFrom(BAKER, alice);
+        rm.revokeRole(alice, BAKER);
         Assert.equal(
-            rm.hasRoleFor(BAKER, alice),
+            rm.hasRole(alice, BAKER),
             false,
-            "Revoke role failed"
+            "Alice's BAKER_ROLE should be revoked"
         );
     }
 }
