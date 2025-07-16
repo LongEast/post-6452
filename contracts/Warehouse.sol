@@ -33,6 +33,8 @@ contract Warehouse is AccessControl {
         onlyRole(WAREHOUSE_ROLE)
     {
         require(batch_exists(batchId), "Batch not exist");
+        (, , , , , uint8 status, ) = lifecycle.getRecord(batchId);
+        require(status == 2, "Batch not in the warehouse");
 
         lifecycle.confirmDelivered(batchId);
         emit BatchDelivered(batchId, msg.sender, block.timestamp);
