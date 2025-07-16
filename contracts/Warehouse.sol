@@ -33,6 +33,7 @@ contract Warehouse is AccessControl {
         onlyRole(WAREHOUSE_ROLE)
     {
         require(batch_exists(batchId), "Batch not exist");
+
         lifecycle.confirmDelivered(batchId);
         emit BatchDelivered(batchId, msg.sender, block.timestamp);
     }
@@ -44,6 +45,7 @@ contract Warehouse is AccessControl {
     {
         require(batch_exists(batchId), "Batch not exist");
         emit QualityChecked(batchId, snapshotHash, block.timestamp);
+        lifecycle.recordQualityCheck(batchId, snapshotHash);
     }
 
 
