@@ -1,2 +1,4 @@
 .deps/
 artifacts/
+contracts/.deps/
+contracts/.states/

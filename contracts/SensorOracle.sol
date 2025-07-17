@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract SensorOracle is AccessControl {
-    using ECDSA for bytes32;
-
+    using ECDSA for bytes32; // External actor with valid signature can also submit proofs
+    
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
     address public trustedSensor;
 
@@ -14,6 +14,8 @@ contract SensorOracle is AccessControl {
         bytes32 dataHash;   // Hash of the off chain sensor data. Can be used to verify the data isnt tampered
         address signer;     // The Ethereum address that signed the dataHash
         uint256 timestamp;  // The original time the sensor collected the data
+        int256 temperature;
+        int256 humidity;
     }
 
     // Organize sensor data by delivery batch
@@ -24,7 +26,10 @@ contract SensorOracle is AccessControl {
         uint256 indexed batchId,
         bytes32 indexed dataHash,
         address indexed signer,
-        uint256 timestamp
+        uint256 timestamp,
+
+        int256 temperature,
+        int256 humidity
     );
 
     constructor(address admin, address sensorSigner) {
@@ -36,6 +41,8 @@ contract SensorOracle is AccessControl {
         uint256 batchId,
         bytes32 dataHash,
         uint256 timestamp,
+        int256 temperature,
+        int256 humidity,
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -56,11 +63,13 @@ contract SensorOracle is AccessControl {
         proofs[batchId].push(SignedProof({
             dataHash: dataHash,
             signer: signer,
-            timestamp: timestamp
+            timestamp: timestamp,
+            temperature: temperature,
+            humidity: humidity
         }));
 
         // Emit the event so the system can see the report is created
-        emit SensorReportSubmitted(batchId, dataHash, signer, timestamp);
+        emit SensorReportSubmitted(batchId, dataHash, signer, timestamp, temperature, humidity);
     }
 
     /// @notice how many proofs we have for a given batch
@@ -80,20 +89,5 @@ contract SensorOracle is AccessControl {
         return proofs[batchId];
     }
 
-
-    // To check if the provided dataHash was really signed by the trusted sensor.
-    function verifyProof(
-        bytes32 dataHash,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external view returns (bool) {
-        bytes32 ethSignedHash = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", dataHash)
-        );
-
-        address signer = ECDSA.recover(ethSignedHash, v, r, s);
-        return signer == trustedSensor;
-    }
 
 }
