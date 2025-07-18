@@ -117,6 +117,11 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
  
+    /// @notice Confirms that a cake batch has been delivered from the warehouse.
+    /// @dev Only callable by accounts with the WAREHOUSE_ROLE. Updates the batch status to Delivered,
+    ///      logs the status change, and emits a RecordUpdated event.
+    /// @param batchId The unique identifier of the cake batch to confirm as delivered.
+    /// @dev The batch must currently have the status ArrivedWarehouse.
     function confirmDelivered(uint256 batchId)
         external
         onlyRole(WAREHOUSE_ROLE)
@@ -128,7 +133,16 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         emit RecordUpdated(batchId, Status.Delivered, msg.sender);
     }
 
-
+    /// @inheritdoc ICakeLifecycle
+    /**
+     * @notice Marks a specific cake batch as spoiled.
+     * @dev Only callable by accounts with the ORACLE_ROLE.
+     *      Updates the status of the batch to Spoiled, logs the status change,
+     *      and emits a RecordUpdated event.
+     * @param batchId The unique identifier of the cake batch to mark as spoiled.
+     * @dev The batch must not already be marked as spoiled.
+     * @dev RecordUpdated Emitted after the batch status is updated to Spoiled.
+     */
     function markSpoiled(uint256 batchId)
         external
         onlyRole(ORACLE_ROLE)
@@ -140,6 +154,14 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         emit RecordUpdated(batchId, Status.Spoiled, msg.sender);
     }
 
+    /// @inheritdoc ICakeLifecycle
+    /**
+       @notice Audits a cake record for the specified batch.
+       @dev Can only be called by accounts with the AUDITOR_ROLE. The record must be in the Delivered or Spoiled state.
+       @param batchId The unique identifier of the cake batch to audit.
+       @param remarks Additional remarks or comments to log with the audit.
+       @custom:event Emits a {RecordAudited} event upon successful audit.
+    */
     function auditRecord(uint256 batchId, string calldata remarks)
         external
         onlyRole(AUDITOR_ROLE)
@@ -180,6 +202,8 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         )
     {
         CakeRecord storage rec = records[batchId];
+        require(rec.batchId != 0, "CakeLifecycle: batch record not found");
+
         return (
             rec.batchId,
             rec.baker,
