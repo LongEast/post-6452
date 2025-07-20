@@ -1,17 +1,17 @@
-// src/compile.ts
+// compile the Solidity contracts and output the compiled JSON files to the build directory
 import path from 'path';
 import fs from 'fs-extra';
 import solc from 'solc';
 
-// Step 1: 获取合约源代码目录
+// Step 1: get the paths for contracts and build directories
 const contractsPath = path.resolve(__dirname, '../contracts');
 const buildPath = path.resolve(__dirname, '../build');
 
-// Step 2: 清空之前的 build 输出目录
+// Step 2: clear the previous build output directory
 fs.removeSync(buildPath);
 fs.ensureDirSync(buildPath);
 
-// Step 3: 构造输入对象（包含多个 .sol 文件）
+// Step 3: construct the input object (containing multiple .sol files)
 const sources: Record<string, { content: string }> = {};
 fs.readdirSync(contractsPath).forEach(file => {
   if (file.endsWith('.sol')) {
@@ -33,10 +33,10 @@ const input = {
   },
 };
 
-// Step 4: 编译所有合约
+// Step 4: compile all contracts
 const output = JSON.parse(solc.compile(JSON.stringify(input)));
 
-// Step 5: 写入每个合约的编译结果
+// Step 5: write each contract's compilation result
 for (const fileName in output.contracts) {
   for (const contractName in output.contracts[fileName]) {
     const contract = output.contracts[fileName][contractName];
