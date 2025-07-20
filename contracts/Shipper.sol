@@ -10,17 +10,18 @@ contract Shipper is AccessControl {
 
     event BatchHandOff(
         uint batchId,
-        uint fromActorId,
-        uint toActorId,
+        address indexed fromActor,
+        address indexed toActor,
         uint timestamp,
-        string geolocation,
+        int256 longitude,
+        int256 latitude,
         bytes32 snapshotHash
     );
     
     event ShippingAccident(
         uint batchId,
         uint timestamp,
-        uint actorId,
+        address actor,
         string accident
     );
 
@@ -29,7 +30,8 @@ contract Shipper is AccessControl {
         uint timestamp,
         address warehouse
     );
-    
+
+
     /// @param shipper the shipper (gets SHIPPER_ROLE)
     /// @param lifecycleAddress the deployed CakeLifecycleRegistry address
     constructor(address shipper, address lifecycleAddress) {
@@ -38,21 +40,21 @@ contract Shipper is AccessControl {
     }
     
     /// @notice record the handoff to next actor
-    function handOffLog(uint batchId, uint fromActorId, uint toActorId, string calldata geolocation, bytes32 snapshotHash) 
+    function handOffLog(uint batchId, address fromActor, address toActor, int256 longitude, int256 latitude, bytes32 snapshotHash) 
         external
         onlyRole(SHIPPER_ROLE) 
     {
-        lifecycle.getRecord(batchId);
-        emit BatchHandOff(batchId, fromActorId, toActorId, block.timestamp, geolocation, snapshotHash);
+        checkBatch(batchId);
+        emit BatchHandOff(batchId, fromActor, toActor, block.timestamp, longitude, latitude, snapshotHash);
     }
     
     /// @notice record any accident during shipping
-    function reportAccident(uint batchId, uint actorId, string calldata accident) 
+    function reportAccident(uint batchId, address actor, string calldata accident) 
         external 
         onlyRole(SHIPPER_ROLE)
     {
-        lifecycle.getRecord(batchId);
-        emit ShippingAccident(batchId, block.timestamp, actorId, accident);
+        checkBatch(batchId);
+        emit ShippingAccident(batchId, block.timestamp, actor, accident);
     }
     
     /// @notice record arrival to warehouse
@@ -60,9 +62,22 @@ contract Shipper is AccessControl {
         external
         onlyRole(SHIPPER_ROLE)  
     {    
-        lifecycle.getRecord(batchId);
+        checkBatch(batchId);
         emit BatchDelivered(batchId, block.timestamp, warehouse);
         lifecycle.updateToWarehouse(batchId, warehouse);
+    }
+    
+    /// @notice helper function to check whether a batch exists and is in HandedToShipper status
+    function checkBatch(uint batchId) private view {
+        (
+            ,
+            ,
+            ,
+            ,
+            ,
+            uint8 status,
+        ) = lifecycle.getRecord(batchId);
+        require(status == 1, "Batch is not in HandedToShipper status");
     }
 
 }
