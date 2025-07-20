@@ -14,20 +14,22 @@ contract ShipperTest {
     string constant metadataURI = "ipfs://bafybeid2jvyr7x7n4rmpn4l7yen3q6acj4wbuoyh6c4j6sl5b4s5qzv6fu/meta.json";
     address immutable SHIPPER = address(this);
     address constant WAREHOUSE = address(0xABCD);
-    uint256 constant fromActorId = 1919;
-    uint256 constant toActorId = 810;
-    string constant GEOLOCATION = "Japan";
     bytes32 constant SNAP_HASH  = keccak256(bytes("quality-snapshot"));
+    address constant FROM_ACTOR = address(0x000000001919);
+    address constant TO_ACTOR   = address(0x000000000810);
+    int256  constant LONGITUDE  = 810975;
+    int256  constant LATITUDE   = 3568430;
 
     function beforeAll() public {
         cycle = new CakeLifecycleRegistry(address(this));
         cycle.createRecord(BATCH_ID, metadataURI);
         shipper = new Shipper(SHIPPER, address(cycle));
         cycle.grantRole(cycle.SHIPPER_ROLE(), address(shipper));
+        cycle.updateToShipper(BATCH_ID, address(shipper));
     }
 
     function testInexistentBatch() public {
-        try shipper.handOffLog(BATCH_ID + 1, fromActorId, toActorId, GEOLOCATION, SNAP_HASH) {
+        try shipper.handOffLog(BATCH_ID + 1, FROM_ACTOR, TO_ACTOR, LONGITUDE, LATITUDE, SNAP_HASH) {
             Assert.ok(false, "Expected revert but function succeeded");
         } catch Error(string memory reason) {
             Assert.equal(reason, "CakeLifecycle: batch record not found", "Reason mismatch");
@@ -35,7 +37,7 @@ contract ShipperTest {
             Assert.ok(false, "Not revert as expected"); 
         }
 
-        try shipper.reportAccident(BATCH_ID + 1, fromActorId, "Cake stolen") {
+        try shipper.reportAccident(BATCH_ID + 1, FROM_ACTOR, "Cake stolen") {
             Assert.ok(false, "Expected revert but function succeeded");
         } catch Error(string memory reason) {
             Assert.equal(reason, "CakeLifecycle: batch record not found", "Reason mismatch");
@@ -53,17 +55,16 @@ contract ShipperTest {
     }
     
     function testReportAccident() public {
-        shipper.reportAccident(BATCH_ID, fromActorId, "Cake stolen");
-        Assert.ok(true, "ReportAccident execuated as expected");
+        shipper.reportAccident(BATCH_ID, FROM_ACTOR, "Cake stolen");
+        Assert.ok(true, "ReportAccident executed as expected");
     }
 
     function testHandOffLog() public {
-        shipper.handOffLog(BATCH_ID, fromActorId, toActorId, GEOLOCATION, SNAP_HASH);
+        shipper.handOffLog(BATCH_ID, FROM_ACTOR, TO_ACTOR, LONGITUDE, LATITUDE, SNAP_HASH);
         Assert.ok(true, "HandOffLog execuated as expected");
     }
 
     function testDeliveredToWarehouse() public {
-        cycle.updateToShipper(BATCH_ID, SHIPPER);
         shipper.deliveredToWarehouse(BATCH_ID, WAREHOUSE);
         (
             ,
@@ -72,7 +73,6 @@ contract ShipperTest {
             address warehouse,
             ,
             uint8 status,
-
         ) = cycle.getRecord(BATCH_ID);
         Assert.equal(status, 2, "status mismatch");
         Assert.equal(warehouse, address(0xABCD), "warehouse address mismatch");
