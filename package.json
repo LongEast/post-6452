@@ -22,9 +22,12 @@
   "homepage": "https://github.com/LongEast/COMP6452-blockchain#readme",
   "dependencies": {
     "dotenv": "^17.2.0",
-    "ethers": "^6.15.0"
+    "ethers": "^6.15.0",
+    "fs-extra": "^11.3.0",
+    "solc": "^0.8.30"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.0.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

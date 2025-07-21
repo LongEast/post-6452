@@ -48,11 +48,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /// @notice Creates a new cake record for a given batch ID with associated metadata.
-    /// @dev Only accounts with the BAKER_ROLE can call this function. Ensures that a record for the given batch ID does not already exist.
-    /// @param batchId The unique identifier for the cake batch.
-    /// @param metadataURI The URI pointing to the metadata associated with the cake batch.
-    /// @custom:emit Emits a {RecordCreated} event upon successful creation.
     function createRecord(uint256 batchId, string calldata metadataURI)
         external
         onlyRole(BAKER_ROLE)
@@ -72,16 +67,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /**
-     * @notice Updates the status of a cake batch to indicate it has been handed off to the shipper.
-     * @dev Only callable by accounts with the BAKER_ROLE.
-     * @param batchId The unique identifier of the cake batch to update.
-     * @param shipper The address of the shipper receiving the batch.
-     * Requirements:
-     * - The batch must be in the 'Created' status.
-     * - Caller must have the BAKER_ROLE.
-     * Emits a {RecordUpdated} event upon successful update.
-     */
     function updateToShipper(uint256 batchId, address shipper)
         external
         onlyRole(BAKER_ROLE)
@@ -95,15 +80,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /**
-     * @notice Updates the status of a cake batch to indicate it has arrived at the warehouse.
-     * @dev Can only be called by an account with the SHIPPER_ROLE.
-     *      Requires that the current status of the batch is HandedToShipper.
-     *      Updates the warehouse address, sets the status to ArrivedWarehouse,
-     *      logs the status change, and emits a RecordUpdated event.
-     * @param batchId The unique identifier of the cake batch.
-     * @param warehouse The address of the warehouse where the batch has arrived.
-     */
     function updateToWarehouse(uint256 batchId, address warehouse)
         external
         onlyRole(SHIPPER_ROLE)
@@ -115,13 +91,22 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         statusLog[batchId].push("Arrived at WAREHOUSE");
         emit RecordUpdated(batchId, Status.ArrivedWarehouse, msg.sender);
     }
+    function recordQualityCheck(uint256 batchId, bytes32 snapshotHash)
+        external
+        onlyRole(WAREHOUSE_ROLE)
+        {
+        CakeRecord storage rec = records[batchId];
+        require(
+            rec.status == Status.ArrivedWarehouse || rec.status == Status.Delivered,
+            "Wrong status for QC"
+        );
+            statusLog[batchId].push(
+                string(abi.encodePacked("Warehouse QC: ", snapshotHash))
+            );
+        emit RecordUpdated(batchId, rec.status, msg.sender);
+    }
 
- 
-    /// @notice Confirms that a cake batch has been delivered from the warehouse.
-    /// @dev Only callable by accounts with the WAREHOUSE_ROLE. Updates the batch status to Delivered,
-    ///      logs the status change, and emits a RecordUpdated event.
-    /// @param batchId The unique identifier of the cake batch to confirm as delivered.
-    /// @dev The batch must currently have the status ArrivedWarehouse.
+    /// @inheritdoc ICakeLifecycle
     function confirmDelivered(uint256 batchId)
         external
         onlyRole(WAREHOUSE_ROLE)
@@ -134,15 +119,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /**
-     * @notice Marks a specific cake batch as spoiled.
-     * @dev Only callable by accounts with the ORACLE_ROLE.
-     *      Updates the status of the batch to Spoiled, logs the status change,
-     *      and emits a RecordUpdated event.
-     * @param batchId The unique identifier of the cake batch to mark as spoiled.
-     * @dev The batch must not already be marked as spoiled.
-     * @dev RecordUpdated Emitted after the batch status is updated to Spoiled.
-     */
     function markSpoiled(uint256 batchId)
         external
         onlyRole(ORACLE_ROLE)
@@ -155,13 +131,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /**
-       @notice Audits a cake record for the specified batch.
-       @dev Can only be called by accounts with the AUDITOR_ROLE. The record must be in the Delivered or Spoiled state.
-       @param batchId The unique identifier of the cake batch to audit.
-       @param remarks Additional remarks or comments to log with the audit.
-       @custom:event Emits a {RecordAudited} event upon successful audit.
-    */
     function auditRecord(uint256 batchId, string calldata remarks)
         external
         onlyRole(AUDITOR_ROLE)
@@ -177,17 +146,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /**
-     * @notice Retrieves the details of a cake batch record by its batch ID.
-     * @param batchId The unique identifier of the cake batch.
-     * @return id The batch ID of the cake record.
-     * @return baker The address of the baker associated with the batch.
-     * @return shipper The address of the shipper responsible for the batch.
-     * @return warehouse The address of the warehouse storing the batch.
-     * @return createdAt The timestamp when the batch record was created.
-     * @return status The current status of the batch as an unsigned 8-bit integer.
-     * @return metadataURI The URI pointing to additional metadata for the batch.
-     */
     function getRecord(uint256 batchId)
         external
         view
@@ -216,9 +174,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    /// @notice Retrieves the status log for a specific batch.
-    /// @param batchId The unique identifier of the batch whose log is to be retrieved.
-    /// @return An array of strings representing the status log entries for the specified batch.
     function getLog(uint256 batchId)
         external
         view
