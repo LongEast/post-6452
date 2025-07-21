@@ -7,27 +7,31 @@ import "./ICakeLifecycle.sol";
 contract Shipper is AccessControl {
     bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
     ICakeLifecycle public lifecycle;
+    
+    mapping (uint256 => uint256) private alertLogs;
+    mapping (uint256 => uint256) private alertCount;
+    mapping (uint256 => bool) private hasFlagged;
 
     event BatchHandOff(
-        uint batchId,
+        uint256 batchId,
         address indexed fromActor,
         address indexed toActor,
-        uint timestamp,
+        uint256 timestamp,
         int256 longitude,
         int256 latitude,
         bytes32 snapshotHash
     );
     
     event ShippingAccident(
-        uint batchId,
-        uint timestamp,
+        uint256 batchId,
+        uint256 timestamp,
         address actor,
         string accident
     );
 
     event BatchDelivered(
-        uint batchID,
-        uint timestamp,
+        uint256 batchID,
+        uint256 timestamp,
         address warehouse
     );
 
@@ -40,7 +44,7 @@ contract Shipper is AccessControl {
     }
     
     /// @notice record the handoff to next actor
-    function handOffLog(uint batchId, address fromActor, address toActor, int256 longitude, int256 latitude, bytes32 snapshotHash) 
+    function handOffLog(uint256 batchId, address fromActor, address toActor, int256 longitude, int256 latitude, bytes32 snapshotHash) 
         external
         onlyRole(SHIPPER_ROLE) 
     {
@@ -49,7 +53,7 @@ contract Shipper is AccessControl {
     }
     
     /// @notice record any accident during shipping
-    function reportAccident(uint batchId, address actor, string calldata accident) 
+    function reportAccident(uint256 batchId, address actor, string calldata accident) 
         external 
         onlyRole(SHIPPER_ROLE)
     {
@@ -57,8 +61,31 @@ contract Shipper is AccessControl {
         emit ShippingAccident(batchId, block.timestamp, actor, accident);
     }
     
+    function checkAlert(uint256 batchId, uint256 timestamp)
+        external 
+        onlyRole(ORACLE_ROLE)
+    {   
+        checkBatch(batchId);
+        uint256 interval = timestamp - alertLogs[batchId];
+        if (interval >= 295 && interval <= 305) {
+            alertCount[batchId]++;
+        }
+        
+        else {
+            alertCount[batchId] = 1;
+        }
+
+        alertLogs[batchId] = timestamp;
+
+
+        if (alertCount[batchId] == 3 && hasFlagged[batchId] == false) {
+            lifecycle.flagBatch(batchId, timestamp);
+            hasFlagged[batchId] = true;
+        }
+    }
+
     /// @notice record arrival to warehouse
-    function deliveredToWarehouse(uint batchId, address warehouse)
+    function deliveredToWarehouse(uint256 batchId, address warehouse)
         external
         onlyRole(SHIPPER_ROLE)  
     {    
@@ -68,14 +95,19 @@ contract Shipper is AccessControl {
     }
     
     /// @notice helper function to check whether a batch exists and is in HandedToShipper status
-    function checkBatch(uint batchId) private view {
+    function checkBatch(uint256 batchId) private view {
         (
             ,
             ,
             ,
             ,
             ,
-            uint8 status,
+            uint256 status,
+            ,
+            ,
+            ,
+            ,
+            ,
         ) = lifecycle.getRecord(batchId);
         require(status == 1, "Batch is not in HandedToShipper status");
     }
