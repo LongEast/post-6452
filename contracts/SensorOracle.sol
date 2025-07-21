@@ -3,6 +3,8 @@ pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
+// This contract is not abstract. All required functions from AccessControl are implemented or inherited.
+// Warning from Remix can be safely ignored.
 contract SensorOracle is AccessControl {
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 

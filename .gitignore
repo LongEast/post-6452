@@ -3,3 +3,5 @@ artifacts/
 contracts/.deps/
 contracts/.states/
 .states/
+node_modules/
+backend/.env
