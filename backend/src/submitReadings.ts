@@ -10,7 +10,7 @@ config()
 //
 // Step 1: Read in our sensor data JSON file
 //
-const readingPath = path.resolve(process.cwd(), "data/Reading.json");
+const readingPath = path.resolve(process.cwd(), "data/Readings.json");
 
 // Expecting {"Readings":[{batchId, timestamp, temperature, humidity}, …]}
 const { Readings } = JSON.parse(
@@ -35,8 +35,8 @@ async function main() {
   // Step 3: Load the Oracle ABI
   //
   // We read the compiled contract artifact JSON and pull out its "abi" field
-  const abiPath = path.resolve(process.cwd(), "src/abi/SensorOracle.json");
-  const ORACLE_ABI = JSON.parse(fs.readFileSync(abiPath, "utf8"));
+  const abiPath = path.resolve(__dirname, "../../artifacts/SensorOracle.json");
+  const { abi: ORACLE_ABI } = JSON.parse(fs.readFileSync(abiPath, "utf8"));
 
 
   //
