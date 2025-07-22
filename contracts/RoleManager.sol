@@ -34,7 +34,7 @@ contract RoleManager is AccessControl {
     }
 
     /// @notice Check if `who` has been granted `role`
-    function hasRole(address who, bytes32 role)
+    function checkRole(address who, bytes32 role)
         external
         view
         returns (bool)
