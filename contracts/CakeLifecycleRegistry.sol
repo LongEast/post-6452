@@ -61,7 +61,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         uint256 maxHumidity,
         uint256 minHumidity,
         string calldata metadataURI
-        )
+    )
         external
         onlyRole(BAKER_ROLE)
     {
@@ -121,7 +121,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         statusLog[batchId].push("Arrived at WAREHOUSE");
         emit RecordUpdated(batchId, Status.ArrivedWarehouse, msg.sender);
     }
-    
+
     /// @inheritdoc ICakeLifecycle
     function recordQualityCheck(uint256 batchId, bytes32 snapshotHash)
         external
