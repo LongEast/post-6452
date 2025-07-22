@@ -48,7 +48,14 @@ contract CakeFactory is AccessControl {
     }
 
     /// @notice register a new cake batch on‐chain and in the lifecycle registry
-    function createBatch(uint256 batchId, string calldata metadataURI)
+    function createBatch(
+        uint256 batchId, 
+        uint256 maxTemperature,
+        uint256 minTemperature,
+        uint256 maxHumidity,
+        uint256 minHumidity,
+        string calldata metadataURI
+    )
         external
         onlyRole(BAKER_ROLE)
     {
@@ -57,7 +64,7 @@ contract CakeFactory is AccessControl {
         emit BatchCreated(batchId, msg.sender, metadataURI, block.timestamp);
 
         // record in the central lifecycle registry
-        lifecycle.createRecord(batchId, metadataURI);
+        lifecycle.createRecord(batchId, maxTemperature, minTemperature, maxHumidity, minHumidity, metadataURI);
     }
 
     /// @notice record a factory quality check snapshot
@@ -90,4 +97,3 @@ contract CakeFactory is AccessControl {
         emit BatchCancelled(batchId, reason, block.timestamp);
     }
 }
-

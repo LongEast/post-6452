@@ -28,6 +28,11 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         address warehouse;
         uint256 createdAt;
         Status status;
+        uint256 maxTemperature;
+        uint256 minTemperature;
+        uint256 maxHumidity;
+        uint256 minHumidity;
+        bool isFlaged;
         string metadataURI;
     }
 
@@ -36,6 +41,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
 
     event RecordCreated(uint256 indexed batchId, address indexed baker, string metadataURI);
     event RecordUpdated(uint256 indexed batchId, Status newStatus, address indexed actor);
+    event RecordFlaged(uint256 indexed batchId, uint256 timestamp);
     event RecordAudited(uint256 indexed batchId, address indexed auditor, string remarks);
 
     constructor(address admin) {
@@ -48,7 +54,14 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     }
 
     /// @inheritdoc ICakeLifecycle
-    function createRecord(uint256 batchId, string calldata metadataURI)
+    function createRecord(
+        uint256 batchId,
+        uint256 maxTemperature,
+        uint256 minTemperature,
+        uint256 maxHumidity,
+        uint256 minHumidity,
+        string calldata metadataURI
+    )
         external
         onlyRole(BAKER_ROLE)
     {
@@ -60,6 +73,11 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
             warehouse: address(0),
             createdAt: block.timestamp,
             status: Status.Created,
+            maxTemperature: maxTemperature,
+            minTemperature: minTemperature,
+            maxHumidity: maxHumidity,
+            minHumidity: minHumidity,
+            isFlaged: false,
             metadataURI: metadataURI
         });
         statusLog[batchId].push("Created by BAKER");
@@ -78,6 +96,18 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         statusLog[batchId].push("Handoff to SHIPPER");
         emit RecordUpdated(batchId, Status.HandedToShipper, msg.sender);
     }
+    
+    /// @inheritdoc ICakeLifecycle
+    function flagBatch(uint256 batchId, uint256 timestamp)
+        external
+        onlyRole(SHIPPER_ROLE)
+    {
+        CakeRecord storage rec = records[batchId];
+        require(rec.status == Status.HandedToShipper, "Invalid status");
+        rec.isFlaged = true;
+        statusLog[batchId].push("Flag the batch");
+        emit RecordFlaged(batchId, timestamp);
+    }
 
     /// @inheritdoc ICakeLifecycle
     function updateToWarehouse(uint256 batchId, address warehouse)
@@ -91,6 +121,8 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         statusLog[batchId].push("Arrived at WAREHOUSE");
         emit RecordUpdated(batchId, Status.ArrivedWarehouse, msg.sender);
     }
+
+    /// @inheritdoc ICakeLifecycle
     function recordQualityCheck(uint256 batchId, bytes32 snapshotHash)
         external
         onlyRole(WAREHOUSE_ROLE)
@@ -156,10 +188,16 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
             address warehouse,
             uint256 createdAt,
             uint8 status,
+            uint256 maxTemperature,
+            uint256 minTemperature,
+            uint256 maxHumidity,
+            uint256 minHumidity,
+            bool isFlaged,
             string memory metadataURI
         )
     {
         CakeRecord storage rec = records[batchId];
+        require(rec.batchId != 0, "CakeLifecycle: batch record not found");
         return (
             rec.batchId,
             rec.baker,
@@ -167,6 +205,11 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
             rec.warehouse,
             rec.createdAt,
             uint8(rec.status),
+            rec.maxTemperature,
+            rec.minTemperature,
+            rec.maxHumidity,
+            rec.minHumidity,
+            rec.isFlaged,
             rec.metadataURI
         );
     }
