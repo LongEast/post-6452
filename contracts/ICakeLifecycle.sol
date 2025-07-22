@@ -13,7 +13,6 @@ interface ICakeLifecycle {
     function updateToShipper(uint256 batchId, address shipper) external;
     function flagBatch(uint256 batchId, uint256 timestamp) external;
     function updateToWarehouse(uint256 batchId, address warehouse) external;
-    function recordQualityCheck(uint256 batchId, bytes32 snapshotHash) external;
     function confirmDelivered(uint256 batchId) external;
     function recordQualityCheck(uint256 batchId, bytes32 snapshotHash) external;
     function markSpoiled(uint256 batchId) external;
