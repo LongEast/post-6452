@@ -2,11 +2,20 @@
 pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./IShipmentAlertSink.sol";
 
 // This contract is not abstract. All required functions from AccessControl are implemented or inherited.
 // Warning from Remix can be safely ignored.
 contract SensorOracle is AccessControl {
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+    IShipmentAlertSink public shipment;
+
+
+    int256 public maxTemp      = 20;   // °C
+    int256 public minTemp      = -7;
+    int256 public MAX_HUMIDITY = 50;   // %
+    int256 public MIN_HUMIDITY = 20;
+
 
     struct SensorReading {
         uint256 timestamp;
@@ -24,6 +33,12 @@ contract SensorOracle is AccessControl {
         int256  humidity
     );
 
+    event ThresholdAlert(
+        uint256 indexed batchId,
+        uint256 timestamp,
+        string  reason
+    );
+
     /// @param admin       gets DEFAULT_ADMIN_ROLE (can add/remove oracles)
     /// @param sensorAddr  gets ORACLE_ROLE — only this address can call submitSensorData
     constructor(address admin, address sensorAddr) {
@@ -33,27 +48,23 @@ contract SensorOracle is AccessControl {
         _grantRole(ORACLE_ROLE, sensorAddr);
     }
 
+    function setShipment(address shipmentAddr)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        shipment = IShipmentAlertSink(shipmentAddr);
+    }
+
     /// @notice Only the on-chain “sensor” may call this
     function submitSensorData(
         uint256 batchId,
-        uint256 timestamp,
         int256  temperature,
         int256  humidity
     )
         external
         onlyRole(ORACLE_ROLE)
     {
-        // Sanity checks
-        require(timestamp <= block.timestamp, "cannot use future timestamp");
-        if (readings[batchId].length > 0) {
-            require(
-              timestamp > readings[batchId][readings[batchId].length - 1].timestamp,
-              "timestamp must increase"
-            );
-        }
-        // require(temperature >= -50 && temperature <= 100, "temp out of range");
-        // require(humidity    >=   0 && humidity    <= 100, "hum out of range");
-
+        uint256 timestamp = block.timestamp;
         readings[batchId].push(SensorReading({
           timestamp:   timestamp,
           temperature: temperature,
@@ -61,6 +72,29 @@ contract SensorOracle is AccessControl {
         }));
 
         emit SensorReportSubmitted(batchId, timestamp, temperature, humidity);
+        string memory reason = "";
+        bool violated;
+
+        if (temperature > maxTemp)      { violated = true; reason = "TEMP_HIGH"; }
+        else if (temperature < minTemp) { violated = true; reason = "TEMP_LOW"; }
+        else if (humidity > MAX_HUMIDITY){ violated = true; reason = "HUM_HIGH"; }
+        else if (humidity < MIN_HUMIDITY){ violated = true; reason = "HUM_LOW"; }
+
+        if (violated) {
+            emit ThresholdAlert(batchId, timestamp, reason);
+
+            // Push alert to Shipment — swallow errors so Oracle doesn’t get stuck
+            if (address(shipment) != address(0)) {
+                try shipment.checkAlert(batchId, timestamp) {
+                    // ok
+                } catch {
+                    // you could emit a “FailedPush” event here for debugging
+                }
+            }
+        }
+
+        
+
     }
 
     /// @notice How many readings for a batch

@@ -6,6 +6,7 @@ import path from 'path';
 // Load .env into process.env
 config()
 
+// NOTE: use _npm run submit-reading_ to run this program
 
 //
 // Step 1: Read in our sensor data JSON file
@@ -17,7 +18,6 @@ const { Readings } = JSON.parse(
   fs.readFileSync(readingPath, "utf-8")
 ) as { Readings: Array<{
   batchId: number;
-  timestamp: number;
   temperature: number;
   humidity: number;
 }>};
@@ -55,7 +55,7 @@ async function main() {
   for (const r of Readings) {
     console.log("Submitting:", r);
     const tx = await oracle.submitSensorData(
-      r.batchId, r.timestamp, r.temperature, r.humidity,
+      r.batchId, r.temperature, r.humidity,
       { gasLimit: 100_000 }
     );
     console.log(" tx hash:", tx.hash);

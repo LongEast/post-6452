@@ -1,526 +1,502 @@
-{
-"abi": [
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "admin",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "sensorSigner",
-					"type": "address"
-				}
-			],
-			"stateMutability": "nonpayable",
-			"type": "constructor"
-		},
-		{
-			"inputs": [],
-			"name": "AccessControlBadConfirmation",
-			"type": "error"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "neededRole",
-					"type": "bytes32"
-				}
-			],
-			"name": "AccessControlUnauthorizedAccount",
-			"type": "error"
-		},
-		{
-			"inputs": [],
-			"name": "ECDSAInvalidSignature",
-			"type": "error"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "length",
-					"type": "uint256"
-				}
-			],
-			"name": "ECDSAInvalidSignatureLength",
-			"type": "error"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "s",
-					"type": "bytes32"
-				}
-			],
-			"name": "ECDSAInvalidSignatureS",
-			"type": "error"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "previousAdminRole",
-					"type": "bytes32"
-				},
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "newAdminRole",
-					"type": "bytes32"
-				}
-			],
-			"name": "RoleAdminChanged",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "sender",
-					"type": "address"
-				}
-			],
-			"name": "RoleGranted",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "sender",
-					"type": "address"
-				}
-			],
-			"name": "RoleRevoked",
-			"type": "event"
-		},
-		{
-			"anonymous": false,
-			"inputs": [
-				{
-					"indexed": true,
-					"internalType": "uint256",
-					"name": "batchId",
-					"type": "uint256"
-				},
-				{
-					"indexed": true,
-					"internalType": "bytes32",
-					"name": "dataHash",
-					"type": "bytes32"
-				},
-				{
-					"indexed": true,
-					"internalType": "address",
-					"name": "signer",
-					"type": "address"
-				},
-				{
-					"indexed": false,
-					"internalType": "uint256",
-					"name": "timestamp",
-					"type": "uint256"
-				}
-			],
-			"name": "SensorReportSubmitted",
-			"type": "event"
-		},
-		{
-			"inputs": [],
-			"name": "DEFAULT_ADMIN_ROLE",
-			"outputs": [
-				{
-					"internalType": "bytes32",
-					"name": "",
-					"type": "bytes32"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "ORACLE_ROLE",
-			"outputs": [
-				{
-					"internalType": "bytes32",
-					"name": "",
-					"type": "bytes32"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "batchId",
-					"type": "uint256"
-				}
-			],
-			"name": "getAllProofs",
-			"outputs": [
-				{
-					"components": [
-						{
-							"internalType": "bytes32",
-							"name": "dataHash",
-							"type": "bytes32"
-						},
-						{
-							"internalType": "address",
-							"name": "signer",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "timestamp",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct SensorOracle.SignedProof[]",
-					"name": "",
-					"type": "tuple[]"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "batchId",
-					"type": "uint256"
-				}
-			],
-			"name": "getLastProof",
-			"outputs": [
-				{
-					"components": [
-						{
-							"internalType": "bytes32",
-							"name": "dataHash",
-							"type": "bytes32"
-						},
-						{
-							"internalType": "address",
-							"name": "signer",
-							"type": "address"
-						},
-						{
-							"internalType": "uint256",
-							"name": "timestamp",
-							"type": "uint256"
-						}
-					],
-					"internalType": "struct SensorOracle.SignedProof",
-					"name": "",
-					"type": "tuple"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "batchId",
-					"type": "uint256"
-				}
-			],
-			"name": "getProofCount",
-			"outputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				}
-			],
-			"name": "getRoleAdmin",
-			"outputs": [
-				{
-					"internalType": "bytes32",
-					"name": "",
-					"type": "bytes32"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				}
-			],
-			"name": "grantRole",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				}
-			],
-			"name": "hasRole",
-			"outputs": [
-				{
-					"internalType": "bool",
-					"name": "",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint256",
-					"name": "",
-					"type": "uint256"
-				}
-			],
-			"name": "proofs",
-			"outputs": [
-				{
-					"internalType": "bytes32",
-					"name": "dataHash",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "address",
-					"name": "signer",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256",
-					"name": "timestamp",
-					"type": "uint256"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "address",
-					"name": "callerConfirmation",
-					"type": "address"
-				}
-			],
-			"name": "renounceRole",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "role",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				}
-			],
-			"name": "revokeRole",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "uint256",
-					"name": "batchId",
-					"type": "uint256"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "dataHash",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "uint256",
-					"name": "timestamp",
-					"type": "uint256"
-				},
-				{
-					"internalType": "uint8",
-					"name": "v",
-					"type": "uint8"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "r",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "s",
-					"type": "bytes32"
-				}
-			],
-			"name": "submitSignedProof",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes4",
-					"name": "interfaceId",
-					"type": "bytes4"
-				}
-			],
-			"name": "supportsInterface",
-			"outputs": [
-				{
-					"internalType": "bool",
-					"name": "",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "trustedSensor",
-			"outputs": [
-				{
-					"internalType": "address",
-					"name": "",
-					"type": "address"
-				}
-			],
-			"stateMutability": "view",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "bytes32",
-					"name": "dataHash",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "uint8",
-					"name": "v",
-					"type": "uint8"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "r",
-					"type": "bytes32"
-				},
-				{
-					"internalType": "bytes32",
-					"name": "s",
-					"type": "bytes32"
-				}
-			],
-			"name": "verifyProof",
-			"outputs": [
-				{
-					"internalType": "bool",
-					"name": "",
-					"type": "bool"
-				}
-			],
-			"stateMutability": "view"
-		}
-	]
-}
-
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "sensorAddr",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "AccessControlBadConfirmation",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "neededRole",
+				"type": "bytes32"
+			}
+		],
+		"name": "AccessControlUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "previousAdminRole",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "newAdminRole",
+				"type": "bytes32"
+			}
+		],
+		"name": "RoleAdminChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "RoleGranted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "RoleRevoked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "temperature",
+				"type": "int256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "humidity",
+				"type": "int256"
+			}
+		],
+		"name": "SensorReportSubmitted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "ThresholdAlert",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "DEFAULT_ADMIN_ROLE",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_HUMIDITY",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MIN_HUMIDITY",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "ORACLE_ROLE",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			}
+		],
+		"name": "getLastReading",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "int256",
+						"name": "temperature",
+						"type": "int256"
+					},
+					{
+						"internalType": "int256",
+						"name": "humidity",
+						"type": "int256"
+					}
+				],
+				"internalType": "struct SensorOracle.SensorReading",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			}
+		],
+		"name": "getReadingCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			}
+		],
+		"name": "getRoleAdmin",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "grantRole",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "hasRole",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "maxTemp",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "minTemp",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "readings",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "int256",
+				"name": "temperature",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "humidity",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "callerConfirmation",
+				"type": "address"
+			}
+		],
+		"name": "renounceRole",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "role",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "revokeRole",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "shipmentAddr",
+				"type": "address"
+			}
+		],
+		"name": "setShipment",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "shipment",
+		"outputs": [
+			{
+				"internalType": "contract IShipmentAlertSink",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "batchId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "int256",
+				"name": "temperature",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "humidity",
+				"type": "int256"
+			}
+		],
+		"name": "submitSensorData",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

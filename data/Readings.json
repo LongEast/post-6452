@@ -2,15 +2,18 @@
   "Readings": [
     {
       "batchId":      1,
-      "timestamp":    1691000000,
-      "temperature":  22,
+      "temperature":  15,
       "humidity":     45
     },
     {
-      "batchId":      1,
-      "timestamp":    1691000600,
-      "temperature":  23,
+      "batchId":      2,
+      "temperature":  25,
       "humidity":     47
+    },
+    {
+      "batchId":      3,
+      "temperature":  -4,
+      "humidity":     60
     }
   ]
 }
