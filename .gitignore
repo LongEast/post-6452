@@ -5,3 +5,4 @@ contracts/.states/
 .states/
 node_modules/
 .env
+compiler_config.json
