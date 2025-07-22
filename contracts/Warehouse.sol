@@ -13,6 +13,17 @@ contract Warehouse is AccessControl {
         address indexed warehouse,
         uint256 timestamp
     );
+    event QualityFlagged(
+        uint256 indexed batchId,
+        address indexed warehouse,
+        uint256 timestamp
+    );
+    event QualitySampled(
+        uint256 indexed batchId,
+        address indexed warehouse,
+        uint256 timestamp,
+        uint rand
+    );
     event QualityChecked(
         uint256 indexed batchId,
         bytes32 snapshotHash,
@@ -46,8 +57,24 @@ contract Warehouse is AccessControl {
         onlyRole(WAREHOUSE_ROLE)
     {
         require(batch_exists(batchId), "Batch not exist");
-        emit QualityChecked(batchId, snapshotHash, block.timestamp);
-        lifecycle.recordQualityCheck(batchId, snapshotHash);
+
+        ( , , , , , , , , , , bool isFlagged, ) = lifecycle.getRecord(batchId);
+        bool doCheck = false;
+        if (isFlagged) {
+            doCheck = true;
+            emit QualityFlagged(batchId, msg.sender, block.timestamp);
+        } else {
+            uint rand = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, batchId))) % 100;
+            if (rand < 30) {
+                doCheck = true;
+                emit QualitySampled(batchId, msg.sender, block.timestamp, rand);
+            }
+        }
+
+        if (doCheck) {
+            emit QualityChecked(batchId, snapshotHash, block.timestamp);
+            lifecycle.recordQualityCheck(batchId, snapshotHash);
+        }
     }
 
 
