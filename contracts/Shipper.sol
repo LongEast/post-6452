@@ -6,6 +6,8 @@ import "./ICakeLifecycle.sol";
 
 contract Shipper is AccessControl {
     bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+
     ICakeLifecycle public lifecycle;
     
     mapping (uint256 => uint256) private alertLogs;
