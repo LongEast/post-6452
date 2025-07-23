@@ -42,6 +42,6 @@ for (const fileName in output.contracts) {
     const contract = output.contracts[fileName][contractName];
     const outputFile = path.resolve(buildPath, `${contractName}.json`);
     fs.outputJSONSync(outputFile, contract, { spaces: 2 });
-    console.log(`✅ Compiled: ${contractName}`);
+    console.log(`Compiled: ${contractName}`);
   }
 }

@@ -38,6 +38,10 @@ async function main() {
   const abiPath = path.resolve(__dirname, "../../artifacts/SensorOracle.json");
   const { abi: ORACLE_ABI } = JSON.parse(fs.readFileSync(abiPath, "utf8"));
 
+  const code = await provider.getCode(process.env.ORACLE_ADDRESS!);
+  console.log("bytecode length =", code.length);
+
+
 
   //
   // Step 4: Instantiate the Oracle contract
@@ -60,8 +64,22 @@ async function main() {
     );
     console.log(" tx hash:", tx.hash);
     // Wait for transaction confirmation
-    await tx.wait();
-  }
+    const receipt = await tx.wait();
+    const receipt2  = await provider.getTransactionReceipt(tx.hash);
+    if (receipt2) {
+      console.log("status =", receipt2.status);
+      console.log("log addresses ->", receipt2.logs.map(l => l.address));
+    } else {
+      console.log("Transaction receipt not found for hash:", tx.hash);
+    }
+
+    console.log("status =", receipt.status);   // 1 = success, 0 = revert
+
+    const alertLogs = receipt.logs.filter(
+      (l: any) => l.address.toLowerCase() === process.env.ORACLE_ADDRESS!.toLowerCase()
+    );
+    console.log("logs from Oracle =", alertLogs.length);
+    }
 }
 
 // Run & catch any top-level errors

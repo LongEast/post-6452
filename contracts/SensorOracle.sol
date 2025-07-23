@@ -39,6 +39,13 @@ contract SensorOracle is AccessControl {
         string  reason
     );
 
+    event TESTThresholdAlert(
+        uint256 indexed batchId
+    );
+
+    
+
+
     /// @param admin       gets DEFAULT_ADMIN_ROLE (can add/remove oracles)
     /// @param sensorAddr  gets ORACLE_ROLE — only this address can call submitSensorData
     constructor(address admin, address sensorAddr) {
@@ -54,6 +61,7 @@ contract SensorOracle is AccessControl {
     {
         shipment = IShipmentAlertSink(shipmentAddr);
     }
+        // onlyRole(ORACLE_ROLE)
 
     /// @notice Only the on-chain “sensor” may call this
     function submitSensorData(
@@ -62,38 +70,36 @@ contract SensorOracle is AccessControl {
         int256  humidity
     )
         external
-        onlyRole(ORACLE_ROLE)
     {
-        uint256 timestamp = block.timestamp;
-        readings[batchId].push(SensorReading({
-          timestamp:   timestamp,
-          temperature: temperature,
-          humidity:    humidity
-        }));
+        // uint256 timestamp = block.timestamp;
+        // readings[batchId].push(SensorReading({
+        //   timestamp:   timestamp,
+        //   temperature: temperature,
+        //   humidity:    humidity
+        // }));
 
-        emit SensorReportSubmitted(batchId, timestamp, temperature, humidity);
-        string memory reason = "";
-        bool violated;
+        emit TESTThresholdAlert(batchId); // works
+        // return;
+        // string memory reason = "";
+        // bool violated;
 
-        if (temperature > maxTemp)      { violated = true; reason = "TEMP_HIGH"; }
-        else if (temperature < minTemp) { violated = true; reason = "TEMP_LOW"; }
-        else if (humidity > MAX_HUMIDITY){ violated = true; reason = "HUM_HIGH"; }
-        else if (humidity < MIN_HUMIDITY){ violated = true; reason = "HUM_LOW"; }
+        // if (temperature > maxTemp)      { violated = true; reason = "TEMP_HIGH"; }
+        // else if (temperature < minTemp) { violated = true; reason = "TEMP_LOW"; }
+        // else if (humidity > MAX_HUMIDITY){ violated = true; reason = "HUM_HIGH"; }
+        // else if (humidity < MIN_HUMIDITY){ violated = true; reason = "HUM_LOW"; }
 
-        if (violated) {
-            emit ThresholdAlert(batchId, timestamp, reason);
+        // if (violated) {
+        //     emit ThresholdAlert(batchId, timestamp, reason);
 
-            // Push alert to Shipment — swallow errors so Oracle doesn’t get stuck
-            if (address(shipment) != address(0)) {
-                try shipment.checkAlert(batchId, timestamp) {
-                    // ok
-                } catch {
-                    // you could emit a “FailedPush” event here for debugging
-                }
-            }
-        }
-
-        
+        //     // Push alert to Shipment — swallow errors so Oracle doesn’t get stuck
+        //     if (address(shipment) != address(0)) {
+        //         try shipment.checkAlert(batchId, timestamp) {
+        //             // ok
+        //         } catch {
+        //             // you could emit a “FailedPush” event here for debugging
+        //         }
+        //     }
+        // }
 
     }
 

@@ -20,4 +20,22 @@ config();                                   // loads .env
 // ---- 2.  Prep provider & contract objects ----
 const provider = new ethers.JsonRpcProvider(process.env.INFURA_URL);
 
+const oracle  = new ethers.Contract(process.env.ORACLE_ADDRESS!,  ORACLE_ABI,  provider);
+const shipper = new ethers.Contract(process.env.SHIPPER_ADDRESS!, SHIPPER_ABI, provider);
 
+/* ---------------------------------------------
+   Subscribe to ThresholdAlert
+--------------------------------------------- */
+oracle.on("ThresholdAlert",
+  async (batchId, ts, reason) => {
+    console.log(`  batch=${batchId} ts=${ts} reason=${reason}`);
+
+    // Optional sanity-check: read shipper state
+    const count   = await shipper.alertCount(batchId);
+    const lastTs  = await shipper.alertLogs(batchId);
+    const flagged = await shipper.hasFlagged(batchId);
+    console.log(`   Shipper → count=${count} lastTs=${lastTs} flagged=${flagged}`);
+  });
+
+console.log("  Watching alerts…");
+process.stdin.resume();          // keep Node alive
