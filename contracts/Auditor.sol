@@ -74,7 +74,7 @@ contract Auditor is AccessControl {
     function certifyAudit(
         uint256 batchId,
         bytes32 reportHash,
-        string comments,
+        string calldata comments,
         Verdict verdict
     )
         external
