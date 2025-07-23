@@ -44,7 +44,7 @@ contract Auditor is AccessControl {
 
     modifier onlyAuditor() {
         require(
-            roleManager.hasRole(msg.sender, AUDITOR_ROLE),
+            roleManager.checkRole(msg.sender, AUDITOR_ROLE),
             "Caller is not an auditor"
         );
         _;
