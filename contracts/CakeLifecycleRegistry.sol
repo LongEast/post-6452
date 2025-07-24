@@ -12,30 +12,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     bytes32 public constant ORACLE_ROLE    = keccak256("ORACLE_ROLE");
     bytes32 public constant AUDITOR_ROLE   = keccak256("AUDITOR_ROLE");
 
-    enum Status {
-        Created,
-        HandedToShipper,
-        ArrivedWarehouse,
-        Delivered,
-        Spoiled,
-        Audited
-    }
-
-    struct CakeRecord {
-        uint256 batchId;
-        address baker;
-        address shipper;
-        address warehouse;
-        uint256 createdAt;
-        Status status;
-        uint256 maxTemperature;
-        uint256 minTemperature;
-        uint256 maxHumidity;
-        uint256 minHumidity;
-        bool isFlaged;
-        string metadataURI;
-    }
-
     mapping(uint256 => CakeRecord) private records;
     mapping(uint256 => string[]) private statusLog;
 
@@ -52,8 +28,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         _grantRole(ORACLE_ROLE, admin);
         _grantRole(AUDITOR_ROLE, admin);
     }
-
-    /// @inheritdoc ICakeLifecycle
+    
     function createRecord(
         uint256 batchId,
         uint256 maxTemperature,
@@ -181,38 +156,12 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     function getRecord(uint256 batchId)
         external
         view
-        returns (
-            uint256 id,
-            address baker,
-            address shipper,
-            address warehouse,
-            uint256 createdAt,
-            uint8 status,
-            uint256 maxTemperature,
-            uint256 minTemperature,
-            uint256 maxHumidity,
-            uint256 minHumidity,
-            bool isFlaged,
-            string memory metadataURI
-        )
-    {
-        CakeRecord storage rec = records[batchId];
-        require(rec.batchId != 0, "CakeLifecycle: batch record not found");
-        return (
-            rec.batchId,
-            rec.baker,
-            rec.shipper,
-            rec.warehouse,
-            rec.createdAt,
-            uint8(rec.status),
-            rec.maxTemperature,
-            rec.minTemperature,
-            rec.maxHumidity,
-            rec.minHumidity,
-            rec.isFlaged,
-            rec.metadataURI
-        );
-    }
+        override
+    returns (CakeRecord memory)
+{
+    require(records[batchId].batchId != 0, "CakeLifecycle: batch record not found");
+    return records[batchId];
+}
 
     /// @inheritdoc ICakeLifecycle
     function getLog(uint256 batchId)
