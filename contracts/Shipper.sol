@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
 import "./ICakeLifecycle.sol";
 
 contract Shipper is AccessControl {
