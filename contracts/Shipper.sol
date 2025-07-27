@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import "../node_modules/@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./ICakeLifecycle.sol";
 
 contract Shipper is AccessControl {
@@ -63,7 +63,6 @@ contract Shipper is AccessControl {
     
     function checkAlert(uint256 batchId, uint256 timestamp)
         external 
-        onlyRole(ORACLE_ROLE)
     {   
         checkBatch(batchId);
         uint256 interval = timestamp - alertLogs[batchId];
@@ -94,22 +93,18 @@ contract Shipper is AccessControl {
         lifecycle.updateToWarehouse(batchId, warehouse);
     }
     
-    /// @notice helper function to check whether a batch exists and is in HandedToShipper status
+    // Shipper.sol
     function checkBatch(uint256 batchId) private view {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint256 status,
-            ,
-            ,
-            ,
-            ,
-            ,
-        ) = lifecycle.getRecord(batchId);
-        require(status == 1, "Batch is not in HandedToShipper status");
-    }
+        // grab the whole struct that ICakeLifecycle gives back
+        ICakeLifecycle.CakeRecord memory rec = lifecycle.getRecord(batchId);
+
+        // status 1 == HandedToShipper  (use your enum if it’s public)
+    // Compare enum to enum
+    require(
+        rec.status == ICakeLifecycle.Status.HandedToShipper,
+        "Batch is not in HandedToShipper status"
+    );    
+    
+}
 
 }

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -11,8 +10,33 @@ contract Auditor is AccessControl {
 
     enum Verdict { PASS, FAIL, UNCLEAR }
 
-    RoleManager public roleManager;
+    struct CakeRecord {
+        uint256   batchId;
+        address   baker;
+        address   shipper;
+        address   warehouse;
+        uint256   createdAt;
+        uint8     status;          // use numeric status from lifecycle
+        uint256   maxTemperature;
+        uint256   minTemperature;
+        uint256   maxHumidity;
+        uint256   minHumidity;
+        bool      isFlaged;
+        string    metadataURI;
+    }
+
+    struct AuditRecord {
+        address auditor;
+        uint256 auditedAt;
+        bytes32 reportHash;
+        string  comments;
+        Verdict verdict;
+    }
+
+    RoleManager    public roleManager;
     ICakeLifecycle public lifecycle;
+
+    mapping(uint256 => AuditRecord) public audits;  // batchId → record
 
     event AuditCertified(
         uint256 indexed batchId,
@@ -23,23 +47,18 @@ contract Auditor is AccessControl {
         Verdict verdict
     );
 
-    /// @param reportHash should be keccak256(IPFS CIDv0/1) or SHA256 of full file
-    struct AuditRecord {
-        address auditor;
-        uint256 auditedAt;
-        bytes32 reportHash;  // Off-chain audit report hash for evidence
-        string comments;     // Short summary of audit findings
-        Verdict verdict;    // PASS, FAIL, or UNCLEAR
-    }
+    /* ------------------------------------------------------------------ */
 
-    mapping(uint256 => AuditRecord) public audits;  // batchId => AuditRecord
-
-    constructor(address admin, address roleManagerAddr, address lifecycleAddr) {
+    constructor(
+        address admin,
+        address roleManagerAddr,
+        address lifecycleAddr
+    ) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(AUDITOR_ROLE, admin);
+        _grantRole(AUDITOR_ROLE,        admin);
 
         roleManager = RoleManager(roleManagerAddr);
-        lifecycle = ICakeLifecycle(lifecycleAddr);
+        lifecycle   = ICakeLifecycle(lifecycleAddr);
     }
 
     modifier onlyAuditor() {
@@ -50,17 +69,50 @@ contract Auditor is AccessControl {
         _;
     }
 
-    /// @notice View the CakeLifecycle full record
+    /* --------------------------- view helpers -------------------------- */
+
+    /// Convert the tuple returned by lifecycle into a struct that’s easier to use
+    function _tupleToStruct(
+        uint256 id,
+        address baker,
+        address shipper,
+        address warehouse,
+        uint256 createdAt,
+        uint8   status,
+        uint256 maxT,
+        uint256 minT,
+        uint256 maxH,
+        uint256 minH,
+        bool    isFlaged,
+        string memory uri
+    ) internal pure returns (CakeRecord memory rec) {
+        rec = CakeRecord({
+            batchId:         id,
+            baker:           baker,
+            shipper:         shipper,
+            warehouse:       warehouse,
+            createdAt:       createdAt,
+            status:          status,
+            maxTemperature:  maxT,
+            minTemperature:  minT,
+            maxHumidity:     maxH,
+            minHumidity:     minH,
+            isFlaged:        isFlaged,
+            metadataURI:     uri
+        });
+    }
+
+    /// @notice fetch the full record as a struct
     function viewBatchRecord(uint256 batchId)
         external
         view
         onlyAuditor
-        returns (ICakeLifecycle.CakeRecord memory)
+        returns (CakeRecord memory)
     {
-        return lifecycle.getRecord(batchId);
+        return _tupleToStruct(lifecycle.getRecord(batchId));
     }
 
-    /// @notice View the status log of a batch
+    /// @notice view status-log strings
     function viewStatusLog(uint256 batchId)
         external
         view
@@ -70,7 +122,8 @@ contract Auditor is AccessControl {
         return lifecycle.getLog(batchId);
     }
 
-    /// @notice Certify the audit outcome with an off-chain report hash
+    /* --------------------------- main action -------------------------- */
+
     function certifyAudit(
         uint256 batchId,
         bytes32 reportHash,
@@ -81,19 +134,30 @@ contract Auditor is AccessControl {
         onlyAuditor
     {
         require(audits[batchId].auditor == address(0), "Already audited");
-        lifecycle.auditRecord(batchId, comments); // Call to lifecycle to update status
+
+        // push “audited” status into lifecycle
+        lifecycle.auditRecord(batchId, comments);
+
         audits[batchId] = AuditRecord({
-            auditor: msg.sender,
-            auditedAt: block.timestamp,
+            auditor:    msg.sender,
+            auditedAt:  block.timestamp,
             reportHash: reportHash,
-            comments: comments,
-            verdict: verdict
+            comments:   comments,
+            verdict:    verdict
         });
 
-        emit AuditCertified(batchId, msg.sender, block.timestamp, reportHash, comments, verdict);
+        emit AuditCertified(
+            batchId,
+            msg.sender,
+            block.timestamp,
+            reportHash,
+            comments,
+            verdict
+        );
     }
 
-    /// @notice Retrieve the audit record of a batch
+    /* -------------------------- public getter ------------------------- */
+
     function getAuditRecord(uint256 batchId)
         external
         view

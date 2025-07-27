@@ -13,17 +13,22 @@ const solc = require('solc')
  * @param {string} path Path to import
  * @returns {any} Contract code as an object
  */
-const findImports = (path: string): any => {
-    try {
-        return {
-            contents: fs.readFileSync(`node_modules/${path}`, 'utf8')
-        }
-    } catch (e: any) {
-        return {
-            error: e.message
-        }
-    }
-}
+const findImports = (p: string): any => {
+  try {
+    // 1) try node_modules (OpenZeppelin, etc.)
+    const nm = path.resolve("node_modules", p);
+    if (fs.existsSync(nm)) return { contents: fs.readFileSync(nm, "utf8") };
+
+    // 2) try local contracts folder (./Foo.sol, ../bar/Baz.sol)
+    const local = path.resolve("contracts", p);
+    if (fs.existsSync(local)) return { contents: fs.readFileSync(local, "utf8") };
+
+    return { error: `File not found: ${p}` };
+  } catch (e: any) {
+    return { error: e.message };
+  }
+};
+
 
 /**
  * Writes contracts from the compiled sources into JSON files
@@ -81,6 +86,12 @@ export const compileSols = (names: string[]): any => {
     try {
         return JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }))
     } catch (error) {
-        console.log(error);
+        try {
+        return JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
+        } catch (err: any) {
+        console.error("\nSolc threw:\n", err);
+        throw err;                  // propagate so deployAll exits fast
+        }
+
     }
 }
