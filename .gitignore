@@ -1,0 +1,5 @@
+.deps/
+.states/
+artifacts/
+build/
+node_modules/
