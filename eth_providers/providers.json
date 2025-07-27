@@ -1,5 +1,5 @@
 {
-  "ganache": "http://127.0.0.1:8546",
+  "ganache": "http://127.0.0.1:8545",
   "provider_link_ui":  "ws://127.0.0.1:7545",
-  "provider_link_cli": "ws://127.0.0.1:8546"
+  "provider_link_cli": "ws://127.0.0.1:8545"
 }
