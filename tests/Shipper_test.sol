@@ -20,16 +20,18 @@ contract ShipperTest {
     int256  constant LONGITUDE  = 810975;
     int256  constant LATITUDE   = 3568430;
 
-    function beforeAll() public {
+   function beforeAll() public {
         cycle = new CakeLifecycleRegistry(address(this));
-        cycle.createRecord(BATCH_ID, metadataURI);
+        cycle.createRecord(BATCH_ID, 30, 10, 80, 20, metadataURI);
         shipper = new Shipper(SHIPPER, address(cycle));
         cycle.grantRole(cycle.SHIPPER_ROLE(), address(shipper));
         cycle.updateToShipper(BATCH_ID, address(shipper));
     }
 
     function testInexistentBatch() public {
-        try shipper.handOffLog(BATCH_ID + 1, FROM_ACTOR, TO_ACTOR, LONGITUDE, LATITUDE, SNAP_HASH) {
+        uint256 fakeId = BATCH_ID + 1;
+
+        try shipper.handOffLog(fakeId, FROM_ACTOR, TO_ACTOR, LONGITUDE, LATITUDE, SNAP_HASH) {
             Assert.ok(false, "Expected revert but function succeeded");
         } catch Error(string memory reason) {
             Assert.equal(reason, "CakeLifecycle: batch record not found", "Reason mismatch");
@@ -37,7 +39,7 @@ contract ShipperTest {
             Assert.ok(false, "Not revert as expected"); 
         }
 
-        try shipper.reportAccident(BATCH_ID + 1, FROM_ACTOR, "Cake stolen") {
+        try shipper.reportAccident(fakeId, FROM_ACTOR, "Cake stolen") {
             Assert.ok(false, "Expected revert but function succeeded");
         } catch Error(string memory reason) {
             Assert.equal(reason, "CakeLifecycle: batch record not found", "Reason mismatch");
@@ -45,7 +47,7 @@ contract ShipperTest {
             Assert.ok(false, "Not revert as expected"); 
         }
 
-        try shipper.deliveredToWarehouse(BATCH_ID + 1, WAREHOUSE) {
+        try shipper.deliveredToWarehouse(fakeId, WAREHOUSE) {
             Assert.ok(false, "Expected revert but function succeeded");
         } catch Error(string memory reason) {
             Assert.equal(reason, "CakeLifecycle: batch record not found", "Reason mismatch");
@@ -61,21 +63,15 @@ contract ShipperTest {
 
     function testHandOffLog() public {
         shipper.handOffLog(BATCH_ID, FROM_ACTOR, TO_ACTOR, LONGITUDE, LATITUDE, SNAP_HASH);
-        Assert.ok(true, "HandOffLog execuated as expected");
+        Assert.ok(true, "HandOffLog executed as expected");
     }
 
     function testDeliveredToWarehouse() public {
         shipper.deliveredToWarehouse(BATCH_ID, WAREHOUSE);
-        (
-            ,
-            ,
-            ,
-            address warehouse,
-            ,
-            uint8 status,
-        ) = cycle.getRecord(BATCH_ID);
-        Assert.equal(status, 2, "status mismatch");
-        Assert.equal(warehouse, address(0xABCD), "warehouse address mismatch");
-        Assert.ok(true, "HandOffLog execuated as expected");
+
+        ICakeLifecycle.CakeRecord memory rec = cycle.getRecord(BATCH_ID);
+
+        Assert.equal(uint8(rec.status), uint8(ICakeLifecycle.Status.ArrivedWarehouse), "Status mismatch");
+        Assert.equal(rec.warehouse, WAREHOUSE, "Warehouse address mismatch");
     }
 }

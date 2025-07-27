@@ -18,7 +18,7 @@ contract RoleManager is AccessControl {
     }
 
     /// @notice Grant a role to `who`; only callable by ADMIN_ROLE
-    function grantRole(address who, bytes32 role)
+    function assignRole(address who, bytes32 role)
         external
         onlyRole(ADMIN_ROLE)
     {
@@ -26,7 +26,7 @@ contract RoleManager is AccessControl {
     }
 
     /// @notice Revoke a role from `who`; only callable by ADMIN_ROLE
-    function revokeRole(address who, bytes32 role)
+    function removeRole(address who, bytes32 role)
         external
         onlyRole(ADMIN_ROLE)
     {

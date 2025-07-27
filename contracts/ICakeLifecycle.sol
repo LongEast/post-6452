@@ -27,6 +27,15 @@ interface ICakeLifecycle {
         string metadataURI;
     }
     
+     function createRecord(
+        uint256 batchId,
+        uint256 maxTemperature,
+        uint256 minTemperature,
+        uint256 maxHumidity,
+        uint256 minHumidity,
+        string calldata metadataURI
+    )
+        external;
     function updateToShipper(uint256 batchId, address shipper) external;
     function flagBatch(uint256 batchId, uint256 timestamp) external;
     function updateToWarehouse(uint256 batchId, address warehouse) external;

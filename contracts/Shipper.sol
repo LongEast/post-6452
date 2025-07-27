@@ -6,6 +6,7 @@ import "./ICakeLifecycle.sol";
 
 contract Shipper is AccessControl {
     bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
     ICakeLifecycle public lifecycle;
     
     mapping (uint256 => uint256) private alertLogs;
@@ -96,20 +97,11 @@ contract Shipper is AccessControl {
     
     /// @notice helper function to check whether a batch exists and is in HandedToShipper status
     function checkBatch(uint256 batchId) private view {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint256 status,
-            ,
-            ,
-            ,
-            ,
-            ,
-        ) = lifecycle.getRecord(batchId);
-        require(status == 1, "Batch is not in HandedToShipper status");
+        ICakeLifecycle.CakeRecord memory rec = lifecycle.getRecord(batchId);
+        require(
+                rec.status == ICakeLifecycle.Status.HandedToShipper,
+            "Batch is not in HandedToShipper status"
+        );
     }
 
 }
