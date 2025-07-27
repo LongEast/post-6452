@@ -13,7 +13,6 @@ import "../contracts/Warehouse.sol";
 import "../contracts/CakeLifecycleRegistry.sol";
 
 contract WarehouseTest {
-
     CakeLifecycleRegistry registry;
     Warehouse warehouse;
 
@@ -29,34 +28,25 @@ contract WarehouseTest {
         registry.grantRole(registry.SHIPPER_ROLE(),   address(this)); 
         registry.grantRole(registry.WAREHOUSE_ROLE(), address(warehouse)); 
 
-        registry.createRecord(BATCH_ID, META_URI);
+        // Full lifecycle flow
+        registry.createRecord(BATCH_ID, 28, 5, 75, 30, META_URI);
         registry.updateToShipper(BATCH_ID, address(0xB0B));
         registry.updateToWarehouse(BATCH_ID, address(warehouse));
     }
 
-
-
     function checkConfirmDelivered() public {
         warehouse.confirmDelivered(BATCH_ID);
 
-        (
-            uint256 id,
-            ,
-            ,
-            address warehouseAddr,
-            ,
-            uint8 status,
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(BATCH_ID);
 
-        ) = registry.getRecord(BATCH_ID);
-
-        Assert.equal(id, BATCH_ID, "batch id mismatch");
-        Assert.equal(warehouseAddr, address(warehouse), "warehouse address mismatch");
-        Assert.equal(status, 3, "status should be ConfirmedDelivered (3)");
+        Assert.equal(rec.batchId, BATCH_ID, "batch id mismatch");
+        Assert.equal(rec.warehouse, address(warehouse), "warehouse address mismatch");
+        Assert.equal(uint8(rec.status), uint8(ICakeLifecycle.Status.Delivered), "status should be Delivered (3)");
     }
 
     function checkQualityCheck() public {
         warehouse.checkQuality(BATCH_ID, SNAP_HASH);
-        Assert.ok(true, "checkQuality executed");
+        Assert.ok(true, "checkQuality executed (event-based check not available in Remix)");
     }
 }
     

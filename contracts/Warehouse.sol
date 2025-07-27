@@ -43,9 +43,12 @@ contract Warehouse is AccessControl {
         external
         onlyRole(WAREHOUSE_ROLE)
     {
-        require(batch_exists(batchId), "Batch not exist");
-        (, , , , , uint8 status, ) = lifecycle.getRecord(batchId);
-        require(status == 2, "Batch not in the warehouse");
+        ICakeLifecycle.CakeRecord memory rec = lifecycle.getRecord(batchId);
+        require(rec.batchId != 0, "Batch not exist");
+        require(
+            rec.status == ICakeLifecycle.Status.ArrivedWarehouse,
+            "Batch not in the warehouse"
+        );
 
         lifecycle.confirmDelivered(batchId);
         emit BatchDelivered(batchId, msg.sender, block.timestamp);
@@ -56,15 +59,18 @@ contract Warehouse is AccessControl {
         external
         onlyRole(WAREHOUSE_ROLE)
     {
-        require(batch_exists(batchId), "Batch not exist");
+        ICakeLifecycle.CakeRecord memory rec = lifecycle.getRecord(batchId);
+        require(rec.batchId != 0, "Batch not exist");
 
-        ( , , , , , , , , , , bool isFlagged, ) = lifecycle.getRecord(batchId);
         bool doCheck = false;
-        if (isFlagged) {
+
+        if (rec.isFlaged) {
             doCheck = true;
             emit QualityFlagged(batchId, msg.sender, block.timestamp);
         } else {
-            uint rand = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, batchId))) % 100;
+            uint rand = uint(
+                keccak256(abi.encodePacked(block.timestamp, msg.sender, batchId))
+            ) % 100;
             if (rand < 30) {
                 doCheck = true;
                 emit QualitySampled(batchId, msg.sender, block.timestamp, rand);
@@ -76,11 +82,5 @@ contract Warehouse is AccessControl {
             lifecycle.recordQualityCheck(batchId, snapshotHash);
         }
     }
-
-
-    /// @dev check batchId exists in Registry (id != 0)
-    function batch_exists(uint256 batchId) private view returns (bool) {
-        (uint256 id,,,,,,) = lifecycle.getRecord(batchId);
-        return id != 0;
-    }
+    
 }

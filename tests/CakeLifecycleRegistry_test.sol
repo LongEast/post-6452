@@ -10,7 +10,6 @@ contract CakeLifecycleRegistryTest {
     enum Status { Created, HandedToShipper, ArrivedWarehouse, Delivered, Spoiled, Audited }
 
     function beforeAll() public {
-
         registry = new CakeLifecycleRegistry(address(this));
 
         registry.grantRole(registry.BAKER_ROLE(),     address(this));
@@ -24,95 +23,95 @@ contract CakeLifecycleRegistryTest {
         uint256 batchId = 1;
         string memory uri = "ipfs://cake1";
 
-        registry.createRecord(batchId, uri);
+        registry.createRecord(batchId, 25, 5, 80, 20, uri);
 
-        (, address baker, , , , uint8 status, string memory metadataURI) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(baker,       address(this),         "baker should be this contract");
-        Assert.equal(status,      uint8(Status.Created), "status should be Created");
-        Assert.equal(metadataURI, uri,                   "metadataURI should match");
+        Assert.equal(rec.baker,       address(this),         "baker should be this contract");
+        Assert.equal(uint8(rec.status), uint8(Status.Created), "status should be Created");
+        Assert.equal(rec.metadataURI, uri,                   "metadataURI should match");
     }
 
     function testUpdateToShipper() public {
         uint256 batchId = 2;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 30, 10, 70, 20, "");
         address shipperAddr = address(0x123);
 
         registry.updateToShipper(batchId, shipperAddr);
 
-        (, , address shipper, , , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(shipper, shipperAddr,                      "shipper should be set");
-        Assert.equal(status,  uint8(Status.HandedToShipper),    "status should be HandedToShipper");
+        Assert.equal(rec.shipper, shipperAddr,                   "shipper should be set");
+        Assert.equal(uint8(rec.status), uint8(Status.HandedToShipper), "status should be HandedToShipper");
     }
 
     function testUpdateToWarehouse() public {
         uint256 batchId = 3;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 28, 8, 85, 40, "");
         registry.updateToShipper(batchId, address(this));
         address warehouseAddr = address(0x456);
 
         registry.updateToWarehouse(batchId, warehouseAddr);
 
-        (, , , address warehouse, , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(warehouse, warehouseAddr,                   "warehouse should be set");
-        Assert.equal(status,    uint8(Status.ArrivedWarehouse),  "status should be ArrivedWarehouse");
+        Assert.equal(rec.warehouse, warehouseAddr,                 "warehouse should be set");
+        Assert.equal(uint8(rec.status), uint8(Status.ArrivedWarehouse), "status should be ArrivedWarehouse");
     }
 
     function testConfirmDelivered() public {
         uint256 batchId = 4;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 26, 7, 75, 33, "");
         registry.updateToShipper(batchId, address(this));
         registry.updateToWarehouse(batchId, address(this));
 
         registry.confirmDelivered(batchId);
 
-        (, , , , , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(status, uint8(Status.Delivered), "status should be Delivered");
+        Assert.equal(uint8(rec.status), uint8(Status.Delivered), "status should be Delivered");
     }
 
     function testMarkSpoiled() public {
         uint256 batchId = 5;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 25, 5, 70, 30, "");
 
         registry.markSpoiled(batchId);
 
-        (, , , , , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(status, uint8(Status.Spoiled), "status should be Spoiled");
+        Assert.equal(uint8(rec.status), uint8(Status.Spoiled), "status should be Spoiled");
     }
 
     function testAuditAfterSpoiled() public {
         uint256 batchId = 6;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 30, 10, 70, 30, "");
         registry.markSpoiled(batchId);
 
         registry.auditRecord(batchId, "batch bad");
 
-        (, , , , , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(status, uint8(Status.Audited), "status should be Audited");
+        Assert.equal(uint8(rec.status), uint8(Status.Audited), "status should be Audited");
     }
 
     function testAuditAfterDelivered() public {
         uint256 batchId = 7;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 27, 9, 78, 33, "");
         registry.updateToShipper(batchId, address(this));
         registry.updateToWarehouse(batchId, address(this));
         registry.confirmDelivered(batchId);
 
         registry.auditRecord(batchId, "batch good");
 
-        (, , , , , uint8 status, ) = registry.getRecord(batchId);
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(batchId);
 
-        Assert.equal(status, uint8(Status.Audited), "status should be Audited");
+        Assert.equal(uint8(rec.status), uint8(Status.Audited), "status should be Audited");
     }
 
     function testGetLog() public {
         uint256 batchId = 8;
-        registry.createRecord(batchId, "");
+        registry.createRecord(batchId, 26, 6, 85, 35, "");
         registry.updateToShipper(batchId, address(this));
 
         string[] memory logEntries = registry.getLog(batchId);

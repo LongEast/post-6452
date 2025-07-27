@@ -13,7 +13,6 @@ import "../contracts/CakeFactory.sol";
 import "../contracts/CakeLifecycleRegistry.sol";
 
 contract CakeFactoryTest {
-
     CakeLifecycleRegistry registry;
     CakeFactory factory;
 
@@ -29,42 +28,30 @@ contract CakeFactoryTest {
     }
 
     function checkCreateBatch() public {
-        factory.createBatch(BATCH_ID, META_URI);
-        (
-            uint256 id,
-            address baker,
-            ,
-            ,
-            ,
-            uint8  status,
-            
-        ) = registry.getRecord(BATCH_ID);
+        factory.createBatch(BATCH_ID, 28, 5, 75, 30, META_URI);
 
-        Assert.equal(id,      BATCH_ID, "record.id mismatch");
-        Assert.equal(baker,   address(factory), "baker should be test contract");
-        Assert.equal(status,  0, "status should be Created (0)");
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(BATCH_ID);
+
+        Assert.equal(rec.batchId, BATCH_ID, "record.id mismatch");
+        Assert.equal(rec.baker, address(factory), "baker should be factory");
+        Assert.equal(uint8(rec.status), uint8(ICakeLifecycle.Status.Created), "status should be Created (0)");
+        Assert.equal(rec.metadataURI, META_URI, "Metadata URI mismatch");
     }
 
     function checkHandoffToShipper() public {
         factory.handoffToShipper(BATCH_ID, SHIPPER);
-        (
-            ,
-            ,
-            address shipper,
-            ,
-            ,
-            uint8 status,
-            
-        ) = registry.getRecord(BATCH_ID);
 
-        Assert.equal(shipper, SHIPPER, "shipper address mismatch");
-        Assert.equal(status,  1, "status should be HandedToShipper (1)");
+        ICakeLifecycle.CakeRecord memory rec = registry.getRecord(BATCH_ID);
+
+        Assert.equal(rec.shipper, SHIPPER, "shipper address mismatch");
+        Assert.equal(uint8(rec.status), uint8(ICakeLifecycle.Status.HandedToShipper), "status should be HandedToShipper (1)");
     }
 
     function checkQualityCheck() public {
         factory.recordQualityCheck(BATCH_ID, SNAP_HASH);
         Assert.ok(true, "recordQualityCheck executed");
     }
+    
     function checkCancelBatch() public {
         factory.cancelBatch(BATCH_ID, "test-cancel");
         Assert.ok(true, "cancelBatch executed");
