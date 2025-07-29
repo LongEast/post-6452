@@ -1,0 +1,11 @@
+{
+  "_comment": "Contract addresses after deployment - Copy to contracts.json and update with actual deployed addresses",
+  "_note": "Replace empty strings with actual contract addresses from deployment logs",
+  "CakeLifecycleRegistry": "0xYOUR_LIFECYCLE_REGISTRY_ADDRESS",
+  "CakeFactory": "0xYOUR_CAKE_FACTORY_ADDRESS",
+  "Shipper": "0xYOUR_SHIPPER_ADDRESS",
+  "Warehouse": "0xYOUR_WAREHOUSE_ADDRESS",
+  "SensorOracle": "0xYOUR_SENSOR_ORACLE_ADDRESS",
+  "Auditor": "0xYOUR_AUDITOR_ADDRESS",
+  "RoleManager": "0xYOUR_ROLE_MANAGER_ADDRESS"
+}
