@@ -46,11 +46,34 @@ const oracleAbi = sensorArtefact.SensorOracle.SensorOracle.abi as any;
     oracleAddr      // address (string)
   );
 
+  // ── 3½. remember where we started ───────────────────────────────
+  const startBlock = await web3.eth.getBlockNumber();   //  ← place this **before** the for-loop
+
   /* push each violation */
   for (const r of bad) {
     console.log(`→ pushing batch ${r.batchId}`);
     await oracle.methods
-      .submitSensorData(r.batchId, r.temperature, r.humidity) // add timestamp if your ABI needs it
-      .send({ from: acct.address, gas: 2000000 });
+      .submitSensorData(r.batchId, r.temperature, r.humidity)
+      .send({ from: acct.address, gas: 2_000_000 });
   }
+
+  // ── 5. verify alerts were emitted ────────────────────────────────
+  const topic0 = web3.utils.keccak256(
+    "ThresholdAlert(uint256,uint256,string)"
+  );
+
+  const logs = await web3.eth.getPastLogs({
+    address: oracleAddr,
+    fromBlock: startBlock + 1,   // only the brand-new pushes
+    toBlock:   "latest",
+    topics:    [topic0]
+  });
+
+  console.log("Alert logs found:", logs.length);
+  logs.forEach(l => {
+    const batchId = web3.utils.hexToNumber(l.topics[1]);
+    console.log(`batch ${batchId} logHash=${l.transactionHash}`);
+  });
+
+
 })();

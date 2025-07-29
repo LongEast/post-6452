@@ -19,6 +19,11 @@
       "batchId": 104,
       "temperature": 5,
       "humidity": 45
+    },
+    {
+      "batchId": 105,
+      "temperature": -8,
+      "humidity": 66
     }
   ]
 }
