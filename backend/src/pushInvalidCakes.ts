@@ -51,6 +51,6 @@ const oracleAbi = sensorArtefact.SensorOracle.SensorOracle.abi as any;
     console.log(`→ pushing batch ${r.batchId}`);
     await oracle.methods
       .submitSensorData(r.batchId, r.temperature, r.humidity) // add timestamp if your ABI needs it
-      .send({ from: acct.address });
+      .send({ from: acct.address, gas: 2000000 });
   }
 })();

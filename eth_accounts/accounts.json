@@ -1,5 +1,5 @@
 {
   "_comment": "Accounts from Ganache 7.9.2 — DO NOT use on real net",
-  "acc0": { "pvtKey": "0x2c31e41d1be65f76ed6d5afb995647d25b58f2b0100d4db84f64fe8c3d42dad4" },
-  "acc1": { "pvtKey": "0x6a9990b111110483af00bcab51e7092bc0d17a163fa57bd9c9912e97e4a89c23" }
+  "acc0": { "pvtKey": "0x7d767f2f3e53d0e7b3921c2fe4a235edca16ac135fdd94a44592a337a350ad58" },
+  "acc1": { "pvtKey": "0x4ba160c7997a16f96fc719d6a4c7f2376379c88c027ee68e84fac31908138210" }
 }

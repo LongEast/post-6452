@@ -64,10 +64,11 @@ async function main() {
     "SensorOracle",
     "Auditor"
   ]);
-  if (!out?.contracts) {
-    console.error("Solidity compile failed; check import paths.");
-    process.exit(1);
-  }
+  console.log(out)
+  // if (!out?.contracts) {
+  //   console.error("Solidity compile failed; check import paths.");
+  //   process.exit(1);
+  // }
   writeOutput(out, "build");
 
   /* 2. connect to node -------------------------------------------- */
@@ -83,10 +84,10 @@ async function main() {
 
   /* 3. run the deployment plan ------------------------------------ */
   const addr: Record<string, string> = {
-    $Admin:  adminAddr,      // from CLI
-    $Sensor: sensorAddr,     // from CLI
-    $SensorEOA: sensorAddr,  // synonym for convenience
-    $ShipperEOA: adminAddr   // or pass a 5th CLI arg if you prefer
+    $Admin:  adminAddr,
+    $Sensor: sensorAddr,
+    $SensorEOA: sensorAddr,
+    $ShipperEOA: adminAddr
   };
 
   for (const item of deployPlan) {
@@ -102,7 +103,7 @@ async function main() {
     const inst = await C.deploy({
         data: "0x"+art.evm.bytecode.object,
         arguments: ctorArgs
-      }).send({ from: acct.address });
+      }).send({ from: acct.address, gas: 2000000 });
     addr[`$${item.name}`] = inst.options.address ?? "";
     console.log(`Deployed ${item.name} → ${inst.options.address ?? ""}`);
 
@@ -121,7 +122,7 @@ async function main() {
           : [isPlaceholder(args) ? addr[args] : args];
 
         if (typeof fn === "string") {
-          await (target.methods as any)[fn](...wireArgs).send({ from: acct.address });
+          await (target.methods as any)[fn](...wireArgs).send({ from: acct.address, gas: 2000000 });
         } else {
           throw new Error(`Method name 'fn' must be a string, got: ${typeof fn}`);
         }

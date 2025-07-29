@@ -10,6 +10,6 @@ const output = compileSols([
   "SensorOracle",
   "Auditor"
 ]);
-
+console.log(output)
 writeOutput(output, "build");
 console.log("Contracts compiled to build/");

@@ -85,7 +85,11 @@ export const compileSols = (names: string[]): any => {
                     '*': ['*']
                 }
             },
-            // evmVersion: 'berlin' //Uncomment this line if using Ganache GUI
+              optimizer: {
+                enabled: true,
+        runs: 200
+  }, 
+            evmVersion: 'berlin' //Uncomment this line if using Ganache GUI
         }
     }
 
