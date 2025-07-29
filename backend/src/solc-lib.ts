@@ -1,8 +1,5 @@
 /// SPDX-License-Identifier: UNLICENSED
 
-/// @title Compile contracts
-/// @author Dilum Bandara, CSIRO's Data61
-
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const path = require('path')
@@ -44,6 +41,8 @@ export const writeOutput = (compiled: any, buildPath: string) => {
         console.log(path.resolve(buildPath, contractName + '.json'))
         fsExtra.outputJsonSync(
             path.resolve(buildPath, contractName + '.json'),
+            // This writes just the relevant abi, evm.bytecode
+            // [contractFileName][contractName] if want to simplify
             compiled.contracts
         )
     }
@@ -69,6 +68,14 @@ export const compileSols = (names: string[]): any => {
         }
     })
 
+    // sources = {
+    //   "MyToken.sol": {
+    //     content: "contract MyToken { ... }"
+    //   },
+    //   "Utils.sol": {
+    //     content: "library Utils { ... }"
+    //   }
+    // }
     let input = {
         language: 'Solidity',
         sources,
@@ -89,8 +96,8 @@ export const compileSols = (names: string[]): any => {
         try {
         return JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
         } catch (err: any) {
-        console.error("\nSolc threw:\n", err);
-        throw err;                  // propagate so deployAll exits fast
+            console.error("\nSolc threw:\n", err);
+            throw err;                  // propagate so deployAll exits fast
         }
 
     }

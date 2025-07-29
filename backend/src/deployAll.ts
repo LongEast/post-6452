@@ -44,6 +44,10 @@ const deployPlan: PlanItem[] = [
 // --------------------------------------------------------------------
 
 async function main() {
+  // mode: deploy
+  // acctTag: "acc0"
+  // adminAddr: "0xAdminAddr"
+  // sensorAddr: "0xSensorAddr"
   const [mode, acctTag, adminAddr, sensorAddr] = process.argv.slice(2);
   if (mode !== "deploy") {
     console.error("Usage: deploy accTag adminAddr sensorAddr");
@@ -64,10 +68,11 @@ async function main() {
     console.error("Solidity compile failed; check import paths.");
     process.exit(1);
   }
-  writeOutput(out, "build");                       // optional
+  writeOutput(out, "build");
 
   /* 2. connect to node -------------------------------------------- */
   const web3 = new Web3(providers.ganache);
+  // look up in the eth_accounts/accounts.json
   const acctInfo = (accounts as Record<string, any>)[acctTag];
   if (!acctInfo || typeof acctInfo.pvtKey !== "string") {
     throw new Error(`Account tag '${acctTag}' not found or invalid in accounts.json`);
