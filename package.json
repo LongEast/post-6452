@@ -7,16 +7,23 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "ts-node backend/src/compile.ts",
+    "server": "ts-node backend/src/server.ts",
+    "dev": "ts-node backend/src/server.ts",
+    "deploy": "ts-node backend/src/deployAll.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "fs-extra": "^11.3.0",
     "solc": "^0.8.30",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
     "web3": "^4.16.0"
   },
   "devDependencies": {
@@ -24,6 +31,8 @@
     "@types/express": "^5.0.3",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.0.15",
+    "@types/sqlite3": "^3.1.11",
+    "ganache": "^7.9.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
