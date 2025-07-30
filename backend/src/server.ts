@@ -2,6 +2,9 @@ import express from "express";
 import bodyParser from "body-parser";
 import { initWeb3, loadContract, getContract, sendTransaction, callView, defaultAccount } from "./web3-lib";
 import { initDatabase, DatabaseService, getDatabase, closeDatabase } from "./database";
+;(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
