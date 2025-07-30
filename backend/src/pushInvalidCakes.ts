@@ -15,8 +15,6 @@ const oracleAbi = sensorArtefact.SensorOracle.SensorOracle.abi as any;
 // ── 2. main async wrapper ────────────────────────────────────────
 (async () => {
 
-  console.log(Array.isArray(oracleAbi)) // should log true
-
   /* connect */
   const web3   = new Web3(providers.ganache);
   const acct   = web3.eth.accounts.privateKeyToAccount(accounts.acc0.pvtKey);
