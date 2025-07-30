@@ -1,4 +1,4 @@
-CREATE TABLE cake_batches (
+CREATE TABLE if not exists cake_batches (
     batch_id       BIGINT PRIMARY KEY,
     created_at     TIMESTAMP NOT NULL,
     baker_address  TEXT NOT NULL,

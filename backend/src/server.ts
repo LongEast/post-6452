@@ -2,6 +2,9 @@ import express from "express";
 import bodyParser from "body-parser";
 import { initWeb3, loadContract, getContract, sendTransaction, callView, defaultAccount } from "./web3-lib";
 import { initDatabase, DatabaseService, getDatabase, closeDatabase } from "./database";
+;(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -80,7 +83,7 @@ app.post("/api/factory/batch", async (req, res) => {
   try {
     const { batchId, maxTemperature, minTemperature, maxHumidity, minHumidity, metadataURI } = req.body;
     
-    if (!batchId || !maxTemperature || !minTemperature || !maxHumidity || !minHumidity || !metadataURI) {
+    if (batchId == null || maxTemperature == null || minTemperature == null || maxHumidity == null || minHumidity == null || metadataURI == null) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
@@ -89,6 +92,9 @@ app.post("/api/factory/batch", async (req, res) => {
     const result = await sendTransaction(
       cakeFactory.methods.createBatch(batchId, maxTemperature, minTemperature, maxHumidity, minHumidity, metadataURI)
     );
+
+    console.error("sendTransaction error:", result.error);
+
 
     // If blockchain transaction successful, sync to database
     if (result.success) {
