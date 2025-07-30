@@ -39,6 +39,10 @@ export const initWeb3 = (accountTag: string = "acc0") => {
 // Load contract from build directory
 export const loadContract = (contractName: string, contractAddress: string) => {
   try {
+    if (!web3) {
+      throw new Error("Web3 not initialized. Call initWeb3 first.");
+    }
+    
     const buildPath = path.resolve(`build/${contractName}.json`);
     const contractData = JSON.parse(fs.readFileSync(buildPath, "utf8"));
     
@@ -87,18 +91,27 @@ export const sendTransaction = async (
 ) => {
   try {
     const from = fromAddress || defaultAccount;
-    const result = await contractMethod.send({ from });
+    console.log(`Sending transaction from: ${from}`);
+    
+    const result = await contractMethod.send({ 
+      from,
+      gas: 3000000  // Explicit gas limit
+    });
+    
+    console.log(`Transaction successful: ${result.transactionHash}`);
     return {
       success: true,
       transactionHash: result.transactionHash,
-      blockNumber: result.blockNumber,
-      gasUsed: result.gasUsed
+      blockNumber: result.blockNumber ? result.blockNumber.toString() : null,
+      gasUsed: result.gasUsed ? result.gasUsed.toString() : null
     };
   } catch (error: any) {
     console.error("Transaction failed:", error);
+    console.error("Error details:", error.data);
     return {
       success: false,
-      error: error.message || "Transaction failed"
+      error: error.message || "Transaction failed",
+      details: error.data || null
     };
   }
 };
