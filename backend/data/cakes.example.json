@@ -1,0 +1,16 @@
+{
+  "_comment": "Example data file - Copy to cakes.json and add your test data",
+  "_note": "This file contains sample cake batch data for testing",
+  "cakes": [
+    {
+      "batchId": 101,
+      "temperature": 4,
+      "humidity": 44
+    },
+    {
+      "batchId": 102,
+      "temperature": -10,
+      "humidity": 41
+    }
+  ]
+}
