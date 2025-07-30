@@ -6,11 +6,17 @@ import path from "path";
 import providers from "../../eth_providers/providers.json";
 import accounts  from "../../eth_accounts/accounts.json";
 
+// Helper function to compute role hash like Solidity's keccak256("ROLE_NAME")
+function getRoleHash(web3: Web3, roleName: string): string {
+  return web3.utils.keccak256(roleName);
+}
+
 // ------- 1. describe your deploy order & wiring --------------------
 interface PlanItem {
   name: string;                       // contract name
   ctor: Array<any>;                   // constructor args
   after?: Array<[string,string,any[]]>;// [callTarget, fn, args]
+  postDeploy?: (web3: Web3, addr: Record<string, string>, acct: any, out: any) => Promise<void>; // custom post-deploy logic
 }
 
 const deployPlan: PlanItem[] = [
@@ -21,7 +27,37 @@ const deployPlan: PlanItem[] = [
   { name: "CakeLifecycleRegistry", ctor: ["$Admin"] },
 
   /* 3) now CakeFactory can receive the registry address */
-  { name: "CakeFactory", ctor: ["$Admin", "$CakeLifecycleRegistry"] },
+  { name: "CakeFactory", 
+    ctor: ["$Admin", "$CakeLifecycleRegistry"],
+    postDeploy: async (web3, addr, acct, out) => {
+      // Grant BAKER_ROLE to CakeFactory contract so it can create records
+      const registryAddr = addr["$CakeLifecycleRegistry"];
+      const factoryAddr = addr["$CakeFactory"];
+      console.log(`Attempting to grant BAKER_ROLE to CakeFactory...`);
+      console.log(`Registry address: ${registryAddr}`);
+      console.log(`Factory address: ${factoryAddr}`);
+      console.log(`Admin account: ${acct.address}`);
+      
+      const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
+      const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
+      const registry = new web3.eth.Contract(registryAbi as any, registryAddr);
+      
+      const bakerRole = getRoleHash(web3, "BAKER_ROLE");
+      console.log(`BAKER_ROLE hash: ${bakerRole}`);
+      
+      try {
+        // Check if admin has the right to grant roles
+        const hasAdminRole = await (registry.methods as any).hasRole(web3.utils.keccak256("DEFAULT_ADMIN_ROLE"), acct.address).call();
+        console.log(`Admin has DEFAULT_ADMIN_ROLE: ${hasAdminRole}`);
+        
+        await (registry.methods as any).grantRole(bakerRole, factoryAddr).send({ from: acct.address });
+        console.log(`Granted BAKER_ROLE to CakeFactory (${factoryAddr}) in CakeLifecycleRegistry`);
+      } catch (error) {
+        console.error(`Failed to grant BAKER_ROLE:`, error);
+        throw error;
+      }
+    }
+  },
 
   /* 4) business contracts that depend on the registry */
   { name: "Shipper",   ctor: ["$ShipperEOA", "$CakeLifecycleRegistry"] },
@@ -100,6 +136,11 @@ async function main() {
       }).send({ from: acct.address });
     addr[`$${item.name}`] = inst.options.address ?? "";
     console.log(`Deployed ${item.name} → ${inst.options.address ?? ""}`);
+
+    // post-deploy custom logic
+    if (item.postDeploy) {
+      await item.postDeploy(web3, addr, acct, out);
+    }
 
     // post-deploy wiring
     if (item.after) {
