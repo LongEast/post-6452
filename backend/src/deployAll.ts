@@ -6,7 +6,6 @@ import path from "path";
 import providers from "../../eth_providers/providers.json";
 import accounts  from "../../eth_accounts/accounts.json";
 
-
 // Helper function to compute role hash like Solidity's keccak256("ROLE_NAME")
 function getRoleHash(web3: Web3, roleName: string): string {
   return web3.utils.keccak256(roleName);
@@ -18,7 +17,6 @@ interface PlanItem {
   ctor: Array<any>;                   // constructor args
   after?: Array<[string,string,any[]]>;// [callTarget, fn, args]
   postDeploy?: (web3: Web3, addr: Record<string, string>, acct: any, out: any) => Promise<void>; // custom post-deploy logic
-
 }
 
 const deployPlan: PlanItem[] = [
@@ -143,6 +141,11 @@ async function main() {
       }).send({ from: acct.address, gas: 2000000 });
     addr[`$${item.name}`] = inst.options.address ?? "";
     console.log(`Deployed ${item.name} → ${inst.options.address ?? ""}`);
+
+    // post-deploy custom logic
+    if (item.postDeploy) {
+      await item.postDeploy(web3, addr, acct, out);
+    }
 
     // post-deploy wiring
     if (item.after) {
