@@ -50,7 +50,13 @@ const deployPlan: PlanItem[] = [
         const hasAdminRole = await (registry.methods as any).hasRole(web3.utils.keccak256("DEFAULT_ADMIN_ROLE"), acct.address).call();
         console.log(`Admin has DEFAULT_ADMIN_ROLE: ${hasAdminRole}`);
         
-        await (registry.methods as any).grantRole(bakerRole, factoryAddr).send({ from: acct.address });
+        // await (registry.methods as any).grantRole(bakerRole, factoryAddr).send({ from: acct.address });
+        const gas = await (registry.methods as any)
+        .grantRole(bakerRole, factoryAddr)
+        .estimateGas({ from: acct.address });
+      await (registry.methods as any)
+        .grantRole(bakerRole, factoryAddr)
+        .send({ from: acct.address, gas }); 
         console.log(`Granted BAKER_ROLE to CakeFactory (${factoryAddr}) in CakeLifecycleRegistry`);
       } catch (error) {
         console.error(`Failed to grant BAKER_ROLE:`, error);
