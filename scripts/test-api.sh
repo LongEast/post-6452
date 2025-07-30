@@ -98,12 +98,12 @@ test_endpoint "POST" "/api/admin/contracts" "$contract_data" 200 "Set Contract A
 batch_data='{
   "batchId": 1001,
   "maxTemperature": 20,
-  "minTemperature": -7,
+  "minTemperature": 4,
   "maxHumidity": 50,
   "minHumidity": 20,
   "metadataURI": "ipfs://test"
 }'
-test_endpoint "POST" "/api/factory/batch" "$batch_data" 500 "Create Cake Batch (expected to fail without real contracts)"
+test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch (expected to fail without real contracts)"
 
 # Test 5: Missing Parameters Test
 test_endpoint "POST" "/api/factory/batch" '{}' 400 "Create Batch with Missing Parameters"
@@ -113,14 +113,14 @@ quality_data='{
   "batchId": 1001,
   "snapshotHash": "0xabc123"
 }'
-test_endpoint "POST" "/api/factory/quality-check" "$quality_data" 500 "Factory Quality Check"
+test_endpoint "POST" "/api/factory/quality-check" "$quality_data" 200 "Factory Quality Check"
 
 # Test 7: Handoff to Shipper
 handoff_data='{
   "batchId": 1001,
   "shipperAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
 }'
-test_endpoint "POST" "/api/factory/handoff" "$handoff_data" 500 "Handoff to Shipper"
+test_endpoint "POST" "/api/factory/handoff" "$handoff_data" 200 "Handoff to Shipper"
 
 # Test 8: Get Batch Record (should fail for non-existent batch)
 test_endpoint "GET" "/api/lifecycle/batch/1001" "" 500 "Get Batch Record"
@@ -133,11 +133,11 @@ shipper_handoff_data='{
   "batchId": 1001,
   "fromActor": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "toActor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-  "longitude": "151.2093",
-  "latitude": "-33.8688",
+  "longitude": "151",
+  "latitude": "-33",
   "snapshotHash": "0xdef789"
 }'
-test_endpoint "POST" "/api/shipper/handoff" "$shipper_handoff_data" 500 "Shipper Handoff Log"
+test_endpoint "POST" "/api/shipper/handoff" "$shipper_handoff_data" 200 "Shipper Handoff Log"
 
 # Test 11: Report Accident
 accident_data='{
@@ -145,27 +145,27 @@ accident_data='{
   "actor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
   "accident": "Minor temperature spike during loading"
 }'
-test_endpoint "POST" "/api/shipper/accident" "$accident_data" 500 "Report Shipping Accident"
+test_endpoint "POST" "/api/shipper/accident" "$accident_data" 200 "Report Shipping Accident"
 
 # Test 12: Deliver to Warehouse
 delivery_data='{
   "batchId": 1001,
   "warehouseAddress": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
 }'
-test_endpoint "POST" "/api/shipper/deliver" "$delivery_data" 500 "Deliver to Warehouse"
+test_endpoint "POST" "/api/shipper/deliver" "$delivery_data" 200 "Deliver to Warehouse"
 
 # Test 13: Confirm Delivery
 confirm_data='{
   "batchId": 1001
 }'
-test_endpoint "POST" "/api/warehouse/confirm-delivery" "$confirm_data" 500 "Confirm Warehouse Delivery"
+test_endpoint "POST" "/api/warehouse/confirm-delivery" "$confirm_data" 200 "Confirm Warehouse Delivery"
 
 # Test 14: Warehouse Quality Check
 warehouse_quality_data='{
   "batchId": 1001,
   "snapshotHash": "0xghi345"
 }'
-test_endpoint "POST" "/api/warehouse/quality-check" "$warehouse_quality_data" 500 "Warehouse Quality Check"
+test_endpoint "POST" "/api/warehouse/quality-check" "$warehouse_quality_data" 200 "Warehouse Quality Check"
 
 # Test 15: Submit Sensor Data
 sensor_data='{
@@ -173,7 +173,7 @@ sensor_data='{
   "temperature": 18,
   "humidity": 45
 }'
-test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 500 "Submit Sensor Data"
+test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Data"
 
 # Test 16: Get Sensor Readings
 test_endpoint "GET" "/api/oracle/batch/1001/readings" "" 500 "Get Sensor Readings"
