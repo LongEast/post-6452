@@ -427,64 +427,57 @@ app.post("/api/warehouse/quality-check", async (req, res) => {
 app.post("/api/oracle/sensor-data", async (req, res) => {
   try {
     const { batchId, temperature, humidity } = req.body;
-    
     if (!batchId || temperature === undefined || humidity === undefined) {
       return res.status(400).json({ error: "Missing required sensor data" });
     }
 
-    // Submit to blockchain
-    const oracle = getContract("SensorOracle");
-    const result = await sendTransaction(
+    const batch = await DatabaseService.getCakeBatch(batchId);
+    if (!batch) return res.status(404).json({ error: "Unknown batch" });
+
+    /* ---------- local threshold check ---------- */
+    const alerts: string[] = [];
+    if (temperature > batch.max_temp!) {
+      alerts.push(`Temperature too high: ${temperature}°C (max: ${batch.max_temp}°C)`);
+    }
+    if (temperature < batch.min_temp!) {
+      alerts.push(`Temperature too low: ${temperature}°C (min: ${batch.min_temp}°C)`);
+    }
+    if (humidity > batch.max_humidity!) {
+      alerts.push(`Humidity too high: ${humidity}% (max: ${batch.max_humidity}%)`);
+    }
+    if (humidity < batch.min_humidity!) {
+      alerts.push(`Humidity too low: ${humidity}% (min: ${batch.min_humidity}%)`);
+    }
+
+    
+    if (alerts.length == 0) {
+      return res.json({ success: true, onChain: false, alerts: [] });
+    }
+
+    for (const alert of alerts) {
+      await DatabaseService.logOracleAlert(batchId, "SENSOR_ALERT", alert);
+      console.log(`Batch ${batchId} sensor alert: ${alert}`);
+    }
+
+    /* ---------- only bad data reaches chain ---------- */
+    const oracle  = getContract("SensorOracle");
+    const result  = await sendTransaction(
       oracle.methods.submitSensorData(batchId, temperature, humidity)
     );
 
-    // Check if exceeds safe ranges and log alerts to database
-    if (result.success) {
-      try {
-        // Get batch safety ranges
-        const batch = await DatabaseService.getCakeBatch(batchId);
-        if (batch) {
-          const alerts: string[] = [];
-          
-          if (temperature > batch.max_temp!) {
-            alerts.push(`Temperature too high: ${temperature}°C (max: ${batch.max_temp}°C)`);
-          }
-          if (temperature < batch.min_temp!) {
-            alerts.push(`Temperature too low: ${temperature}°C (min: ${batch.min_temp}°C)`);
-          }
-          if (humidity > batch.max_humidity!) {
-            alerts.push(`Humidity too high: ${humidity}% (max: ${batch.max_humidity}%)`);
-          }
-          if (humidity < batch.min_humidity!) {
-            alerts.push(`Humidity too low: ${humidity}% (min: ${batch.min_humidity}%)`);
-          }
-
-          // Log alerts to database
-          for (const alert of alerts) {
-            await DatabaseService.logOracleAlert(batchId, "SENSOR_ALERT", alert);
-            console.log(`Batch ${batchId} sensor alert: ${alert}`);
-          }
-        }
-      } catch (dbError: any) {
-        console.error(`Database alert logging failed: ${dbError.message}`);
-        // Does not affect main flow
-      }
-    }
-
-    res.json({
-      success: result.success,
-      batchId,
-      sensorData: { temperature, humidity },
-      transaction: result.success ? {
-        hash: result.transactionHash,
+    return res.json({
+      success: !!result?.success,
+      onChain: true,
+      alerts,
+      transaction: result && {
+        hash:        result.transactionHash,
         blockNumber: result.blockNumber,
-        gasUsed: result.gasUsed
-      } : null,
-      error: result.error || null
+        gasUsed:     result.gasUsed
+      }
     });
 
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 
