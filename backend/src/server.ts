@@ -759,7 +759,7 @@ app.post("/api/admin/clear-data", async (req, res) => {
       warning: "Database has been reset to brand new state"
     });
 
-    console.log("🗑️  Database cleared via admin API at", new Date().toISOString());
+    console.log("Database cleared via admin API at", new Date().toISOString());
 
   } catch (error: any) {
     console.error("Failed to clear database:", error);

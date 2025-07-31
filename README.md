@@ -2,6 +2,23 @@
 
 A blockchain-based supply chain management system for premium cakes, implementing cold chain logistics tracking with smart contracts and comprehensive API.
 
+## Quick Start (New Contributors)
+
+**Just cloned the project? Get everything running with one command:**
+
+```bash
+./scripts/full-e2e-test.sh
+```
+
+This script automatically handles dependencies, blockchain setup, contract deployment, and runs comprehensive tests!
+
+**Prerequisites:** Node.js (v14+) and jq
+- **macOS:** `brew install node jq`
+- **Ubuntu:** `sudo apt-get install nodejs jq`
+ **See [QUICK-START.md](QUICK-START.md) for detailed instructions**
+
+---
+
 ## Table of Contents
 - [Quick Start Guide](#quick-start-guide)
 - [Contract Address Management](#contract-address-management)
