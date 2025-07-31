@@ -424,6 +424,36 @@ app.post("/api/warehouse/quality-check", async (req, res) => {
 // =============================================================================
 
 // Submit sensor data
+app.post("/api/oracle/set-shipment", async (req, res) => {
+
+  try {
+    const { shipmentAddr } = req.body;
+    if (!shipmentAddr) {
+      return res.status(400).json({ error: "Missing shipmentAddr" });
+    }
+    const oracle = getContract("SensorOracle");
+
+    const result  = await sendTransaction(
+      oracle.methods.setShipment(shipmentAddr)
+    );
+
+    return res.json({
+      success: !!result?.success,
+      onChain: true,
+      transaction: result && {
+        hash:        result.transactionHash,
+        blockNumber: result.blockNumber,
+        gasUsed:     result.gasUsed
+      }
+    });
+  } catch (error: any) {
+    console.error("setShipment error:", error);
+    res.status(500).json({ error: error.message });
+  }
+
+});
+
+
 app.post("/api/oracle/sensor-data", async (req, res) => {
   try {
     const { batchId, temperature, humidity } = req.body;
@@ -467,13 +497,14 @@ app.post("/api/oracle/sensor-data", async (req, res) => {
 
     return res.json({
       success: !!result?.success,
-      onChain: true,
-      alerts,
-      transaction: result && {
-        hash:        result.transactionHash,
+      batchId,
+      sensorData: { temperature, humidity },
+      transaction: result.success ? {
+        hash: result.transactionHash,
         blockNumber: result.blockNumber,
-        gasUsed:     result.gasUsed
-      }
+        gasUsed: result.gasUsed
+      } : null,
+      error: result.error || null
     });
 
   } catch (err: any) {
