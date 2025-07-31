@@ -18,7 +18,7 @@
 # Usage:
 #   ./scripts/test-real-contracts.sh
 #
-# Author: AI Assistant
+# Author: Lilla Guo
 # =============================================================================
 
 set -e
