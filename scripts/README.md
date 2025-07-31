@@ -9,7 +9,7 @@ This directory contains all shell scripts for the Cake Supply Chain project. Eac
 
 ### Complete End-to-End Testing
 
-#### full-e2e-test.sh ⭐ **RECOMMENDED FOR NEW USERS**
+#### full-e2e-test.sh *RECOMMENDED FOR NEW USERS*
 **Purpose**: Complete automated setup and testing for cake supply chain
 
 **Usage**: 
@@ -259,7 +259,7 @@ This directory contains all shell scripts for the Cake Supply Chain project. Eac
 1. `./scripts/test-real-contracts.sh` - Real contract testing (RECOMMENDED)
 2. `./scripts/test-api.sh` - API structure testing
 3. `./scripts/test-audit.sh` - Audit functionality testing
-4. `./scripts/test-clear-data.sh` - Database clear functionality testing (⚠️ clears data!)
+4. `./scripts/test-clear-data.sh` - Database clear functionality testing (clears data!)
 
 ### For Interactive Use
 1. `./scripts/interactive-setup.sh` - Interactive address setup
@@ -302,7 +302,7 @@ npm run deploy
 # Setup fresh database
 ./scripts/setup-database.sh
 
-# Clear all data (⚠️ Warning: destructive)
+# Clear all data (Warning: destructive)
 ./scripts/test-clear-data.sh
 ```
 
@@ -316,10 +316,6 @@ npm run deploy
 - **Dynamic Addresses**: No dependency on hardcoded contract addresses
 - **Automatic Cleanup**: Background processes are automatically terminated
 
-
-**Author**: Lilla Guo  
-**Project**: COMP6452 Blockchain - Cake Supply Chain  
-**Institution**: University of New South Wales  
 
 
 **Questions or issues?** Please refer to the main project documentation or submit issues in the project repository.

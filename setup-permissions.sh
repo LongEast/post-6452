@@ -7,18 +7,18 @@
 # Purpose: Set execute permissions for all scripts in the project
 # 
 # Usage:
-#   ./scripts/setup-permissions.sh
+#   ./setup-permissions.sh
 #   
 # Or if this script doesn't have permissions:
-#   chmod +x scripts/setup-permissions.sh && ./scripts/setup-permissions.sh
+#   chmod +x setup-permissions.sh && ./setup-permissions.sh
 #
-# Author: Lilla Guo
 # =============================================================================
 
 echo "Setting up script permissions..."
 
-# Set permissions for all shell scripts in the scripts directory
+# Set permissions for all shell scripts
 chmod +x scripts/*.sh
+chmod +x *.sh
 
 echo "Script permissions set successfully!"
 echo ""

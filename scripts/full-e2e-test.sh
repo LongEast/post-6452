@@ -86,13 +86,13 @@ wait_for_service() {
         if [ "$service_name" = "Ganache" ]; then
             # For Ganache, check if port is listening
             if nc -z localhost $GANACHE_PORT 2>/dev/null; then
-                echo -e " ${GREEN}✓${NC}"
+                echo -e " ${GREEN}READY${NC}"
                 return 0
             fi
         else
             # For API, use curl
             if curl -s -f "$url" > /dev/null 2>&1; then
-                echo -e " ${GREEN}✓${NC}"
+                echo -e " ${GREEN}READY${NC}"
                 return 0
             fi
         fi
@@ -101,7 +101,7 @@ wait_for_service() {
         attempt=$((attempt + 1))
     done
     
-    echo -e " ${RED}✗${NC}"
+    echo -e " ${RED}FAILED${NC}"
     echo -e "${RED}ERROR: $service_name failed to start after $max_attempts seconds${NC}"
     return 1
 }
@@ -152,9 +152,9 @@ echo -e "${MAGENTA}================================================${NC}\n"
 echo -e "${BLUE}Step 1: Installing Dependencies...${NC}"
 if [ ! -d "node_modules" ]; then
     npm install
-    echo -e "${GREEN}✓ Dependencies installed${NC}\n"
+    echo -e "${GREEN}Dependencies installed${NC}\n"
 else
-    echo -e "${GREEN}✓ Dependencies already installed${NC}\n"
+    echo -e "${GREEN}Dependencies already installed${NC}\n"
 fi
 
 # Step 2: Setup Accounts
@@ -179,7 +179,7 @@ cat > eth_accounts/accounts.json << 'EOF'
   }
 }
 EOF
-echo -e "${GREEN}✓ Accounts configured with Ganache deterministic addresses${NC}\n"
+echo -e "${GREEN}Accounts configured with Ganache deterministic addresses${NC}\n"
 
 # Step 3: Start Ganache
 echo -e "${BLUE}Step 3: Starting Ganache Blockchain...${NC}"
@@ -203,7 +203,7 @@ wait_for_service "localhost:$GANACHE_PORT" "Ganache"
 # Step 4: Compile Contracts
 echo -e "${BLUE}Step 4: Compiling Smart Contracts...${NC}"
 npm run compile
-echo -e "${GREEN}✓ Contracts compiled${NC}\n"
+echo -e "${GREEN}Contracts compiled${NC}\n"
 
 # Step 5: Deploy Contracts
 echo -e "${BLUE}Step 5: Deploying Smart Contracts...${NC}"
@@ -213,7 +213,7 @@ SENSOR_ADDR=$(jq -r '.["acc1"].address' eth_accounts/accounts.json)
 echo "Using admin address: $ADMIN_ADDR"
 echo "Using sensor address: $SENSOR_ADDR"
 npx ts-node backend/src/deployAll.ts deploy acc0 "$ADMIN_ADDR" "$SENSOR_ADDR" | tee deployment_log.txt
-echo -e "${GREEN}✓ Contracts deployed${NC}\n"
+echo -e "${GREEN}Contracts deployed${NC}\n"
 
 # Step 6: Start API Server
 echo -e "${BLUE}Step 6: Starting API Server...${NC}"
@@ -262,7 +262,7 @@ curl -s -X POST \
     -d "$CONTRACTS_JSON" \
     "$API_BASE/api/admin/contracts" | jq .
 
-echo -e "\n${GREEN}✓ Contract addresses configured${NC}\n"
+echo -e "\n${GREEN}Contract addresses configured${NC}\n"
 
 # Step 8: Run Comprehensive Tests
 echo -e "${BLUE}Step 8: Running Comprehensive Tests...${NC}\n"
@@ -417,9 +417,9 @@ echo -e "${MAGENTA}================================================${NC}"
 
 if [ $PASSED_TESTS -eq $TOTAL_TESTS ]; then
     echo -e "${GREEN} ALL TESTS PASSED! ($PASSED_TESTS/$TOTAL_TESTS)${NC}"
-    echo -e "${GREEN}✓ Complete cake supply chain lifecycle tested successfully${NC}"
-    echo -e "${GREEN}✓ All API endpoints working correctly${NC}"
-    echo -e "${GREEN}✓ Contract integration functioning properly${NC}"
+    echo -e "${GREEN}Complete cake supply chain lifecycle tested successfully${NC}"
+    echo -e "${GREEN}All API endpoints working correctly${NC}"
+    echo -e "${GREEN}Contract integration functioning properly${NC}"
     echo ""
     echo -e "${CYAN}Complete lifecycle created for batch $BATCH_ID:${NC}"
     echo -e "${CYAN}   Status: 0 (Created) → 1 (Quality Checked) → 2 (In Transit) → 3 (Delivered)${NC}"
