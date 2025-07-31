@@ -75,7 +75,7 @@ Content-Type: application/json
 }
 ```
 
-**⚠️ WARNING:** This permanently deletes ALL database records and resets to brand new state!
+**WARNING:** This permanently deletes ALL database records and resets to brand new state!
 
 #### Update Batch Status
 ```bash

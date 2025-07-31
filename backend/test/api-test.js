@@ -31,7 +31,7 @@ async function apiCall(endpoint, method = "GET", data = null) {
 
 // Test workflow
 async function testWorkflow() {
-  console.log("🧪 Testing Cake Supply Chain API\n");
+  console.log("Testing Cake Supply Chain API\n");
 
   // 1. Check API health
   await apiCall("/");

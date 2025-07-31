@@ -29,14 +29,9 @@ const deployPlan: PlanItem[] = [
   /* 3) now CakeFactory can receive the registry address */
   { name: "CakeFactory", 
     ctor: ["$Admin", "$CakeLifecycleRegistry"],
-    postDeploy: async (web3, addr, acct, out) => {
-      // Grant BAKER_ROLE to CakeFactory contract so it can create records
+    postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
       const registryAddr = addr["$CakeLifecycleRegistry"];
       const factoryAddr = addr["$CakeFactory"];
-      console.log(`Attempting to grant BAKER_ROLE to CakeFactory...`);
-      console.log(`Registry address: ${registryAddr}`);
-      console.log(`Factory address: ${factoryAddr}`);
-      console.log(`Admin account: ${acct.address}`);
       
       const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
       const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
@@ -61,18 +56,98 @@ const deployPlan: PlanItem[] = [
     }
   },
   /* 4) business contracts that depend on the registry */
-  { name: "Shipper",   ctor: ["$ShipperEOA", "$CakeLifecycleRegistry"] },
-  { name: "Warehouse", ctor: ["$Admin",      "$CakeLifecycleRegistry"] },
+  { name: "Shipper",   
+    ctor: ["$ShipperEOA", "$CakeLifecycleRegistry"],
+    postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
+      const registryAddr = addr["$CakeLifecycleRegistry"];
+      const shipperAddr = addr["$Shipper"];
+      
+      const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
+      const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
+      const registry = new web3.eth.Contract(registryAbi as any, registryAddr);
+      
+      const shipperRole = getRoleHash(web3, "SHIPPER_ROLE");
+      console.log(`SHIPPER_ROLE hash: ${shipperRole}`);
+      
+      try {
+        await (registry.methods as any).grantRole(shipperRole, shipperAddr).send({ from: acct.address, gas: 2000000 });
+        console.log(`Granted SHIPPER_ROLE to Shipper (${shipperAddr}) in CakeLifecycleRegistry`);
+      } catch (error) {
+        console.error(`Failed to grant SHIPPER_ROLE:`, error);
+        throw error;
+      }
+    }
+  },
+  { name: "Warehouse", 
+    ctor: ["$Admin", "$CakeLifecycleRegistry"],
+    postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
+      const registryAddr = addr["$CakeLifecycleRegistry"];
+      const warehouseAddr = addr["$Warehouse"];
+      
+      const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
+      const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
+      const registry = new web3.eth.Contract(registryAbi as any, registryAddr);
+      
+      const warehouseRole = getRoleHash(web3, "WAREHOUSE_ROLE");
+      console.log(`WAREHOUSE_ROLE hash: ${warehouseRole}`);
+      
+      try {
+        await (registry.methods as any).grantRole(warehouseRole, warehouseAddr).send({ from: acct.address, gas: 2000000 });
+        console.log(`Granted WAREHOUSE_ROLE to Warehouse (${warehouseAddr}) in CakeLifecycleRegistry`);
+      } catch (error) {
+        console.error(`Failed to grant WAREHOUSE_ROLE:`, error);
+        throw error;
+      }
+    }
+  },
 
   /* 5) SensorOracle + wiring to the Shipper */
   { name: "SensorOracle",
     ctor:  ["$Admin", "$SensorEOA"],
-    after: [["SensorOracle", "setShipment", ["$Shipper"]]]
+    after: [["SensorOracle", "setShipment", ["$Shipper"]]],
+    postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
+      const registryAddr = addr["$CakeLifecycleRegistry"];
+      const oracleAddr = addr["$SensorOracle"];
+      
+      const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
+      const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
+      const registry = new web3.eth.Contract(registryAbi as any, registryAddr);
+      
+      const oracleRole = getRoleHash(web3, "ORACLE_ROLE");
+      console.log(`ORACLE_ROLE hash: ${oracleRole}`);
+      
+      try {
+        await (registry.methods as any).grantRole(oracleRole, oracleAddr).send({ from: acct.address, gas: 2000000 });
+        console.log(`Granted ORACLE_ROLE to SensorOracle (${oracleAddr}) in CakeLifecycleRegistry`);
+      } catch (error) {
+        console.error(`Failed to grant ORACLE_ROLE:`, error);
+        throw error;
+      }
+    }
   },
 
   /* 6) Auditor depends on both RoleManager and Registry */
   { name: "Auditor",
-    ctor: ["$Admin", "$RoleManager", "$CakeLifecycleRegistry"]
+    ctor: ["$Admin", "$RoleManager", "$CakeLifecycleRegistry"],
+    postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
+      const registryAddr = addr["$CakeLifecycleRegistry"];
+      const auditorAddr = addr["$Auditor"];
+      
+      const registryKey = Object.keys(out.contracts).find(k => k.toLowerCase().includes("cakelifecycleregistry"))!;
+      const registryAbi = out.contracts[registryKey]["CakeLifecycleRegistry"].abi;
+      const registry = new web3.eth.Contract(registryAbi as any, registryAddr);
+      
+      const auditorRole = getRoleHash(web3, "AUDITOR_ROLE");
+      console.log(`AUDITOR_ROLE hash: ${auditorRole}`);
+      
+      try {
+        await (registry.methods as any).grantRole(auditorRole, auditorAddr).send({ from: acct.address, gas: 2000000 });
+        console.log(`Granted AUDITOR_ROLE to Auditor (${auditorAddr}) in CakeLifecycleRegistry`);
+      } catch (error) {
+        console.error(`Failed to grant AUDITOR_ROLE:`, error);
+        throw error;
+      }
+    }
   }
 ];
 

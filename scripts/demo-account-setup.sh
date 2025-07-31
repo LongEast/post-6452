@@ -20,9 +20,9 @@ echo "   cp eth_accounts/accounts.example.json eth_accounts/accounts.json"
 echo
 
 echo "4. Now user has working private key configuration!"
-echo "   ✅ Ready to deploy contracts"
-echo "   ✅ Works with standard Ganache"
-echo "   ✅ No manual editing needed"
+echo "    Ready to deploy contracts"
+echo "    Works with standard Ganache"
+echo "    No manual editing needed"
 echo
 
 echo "=== The private keys they get: ==="
@@ -36,6 +36,6 @@ echo "acc1: 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65"
 echo
 
 echo "=== Security: ==="
-echo "✅ accounts.json is in .gitignore (won't be committed)"
-echo "✅ accounts.example.json is tracked (available to new users)"
-echo "✅ Standard keys are safe for local development only"
+echo "accounts.json is in .gitignore (won't be committed)"
+echo "accounts.example.json is tracked (available to new users)"
+echo "Standard keys are safe for local development only"

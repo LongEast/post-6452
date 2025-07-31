@@ -3,7 +3,7 @@
 # Test script for clear data API functionality
 # This demonstrates how to completely reset the database to brand new state
 
-echo "🧪 Testing Clear Data API Functionality"
+echo "Testing Clear Data API Functionality"
 echo "========================================"
 
 API_BASE="http://localhost:3000"
@@ -31,4 +31,4 @@ echo ""
 echo " Clear data API test completed!"
 echo ""
 echo " WARNING: If the API server was running, all database data has been cleared!"
-echo "💡 To restore test data, run: ./scripts/test-api.sh"
+echo "To restore test data, run: ./scripts/test-api.sh"

@@ -50,8 +50,8 @@ contract CakeFactory is AccessControl {
     /// @notice register a new cake batch on‐chain and in the lifecycle registry
     function createBatch(
         uint256 batchId, 
-        uint256 maxTemperature,
-        uint256 minTemperature,
+        int256 maxTemperature,
+        int256 minTemperature,
         uint256 maxHumidity,
         uint256 minHumidity,
         string calldata metadataURI
