@@ -416,7 +416,7 @@ echo -e "${MAGENTA}              TEST RESULTS SUMMARY             ${NC}"
 echo -e "${MAGENTA}================================================${NC}"
 
 if [ $PASSED_TESTS -eq $TOTAL_TESTS ]; then
-    echo -e "${GREEN}🎉 ALL TESTS PASSED! ($PASSED_TESTS/$TOTAL_TESTS)${NC}"
+    echo -e "${GREEN} ALL TESTS PASSED! ($PASSED_TESTS/$TOTAL_TESTS)${NC}"
     echo -e "${GREEN}✓ Complete cake supply chain lifecycle tested successfully${NC}"
     echo -e "${GREEN}✓ All API endpoints working correctly${NC}"
     echo -e "${GREEN}✓ Contract integration functioning properly${NC}"
