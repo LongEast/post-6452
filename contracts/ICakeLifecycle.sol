@@ -23,7 +23,7 @@ interface ICakeLifecycle {
         int256 minTemperature;
         uint256 maxHumidity;
         uint256 minHumidity;
-        bool isFlaged;
+        bool isFlagged;
         string metadataURI;
     }
     

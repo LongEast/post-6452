@@ -116,7 +116,7 @@ Retrieve complete batch information.
     "minTemperature": "-7",
     "maxHumidity": "50",
     "minHumidity": "20",
-    "isFlaged": false,
+    "isFlagged": false,
     "metadataURI": "ipfs://QmHash..."
   }
 }
@@ -362,7 +362,7 @@ Retrieve complete batch information for auditing purposes, including all lifecyc
     "minTemperature": "-7",
     "maxHumidity": "50",
     "minHumidity": "20",
-    "isFlaged": false,
+    "isFlagged": false,
     "metadataURI": "ipfs://QmHash..."
   },
   "statusHistory": [

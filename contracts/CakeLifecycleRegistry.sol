@@ -52,7 +52,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
             minTemperature: minTemperature,
             maxHumidity: maxHumidity,
             minHumidity: minHumidity,
-            isFlaged: false,
+            isFlagged: false,
             metadataURI: metadataURI
         });
         statusLog[batchId].push("Created by BAKER");
@@ -79,7 +79,7 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     {
         CakeRecord storage rec = records[batchId];
         require(rec.status == Status.HandedToShipper, "Invalid status");
-        rec.isFlaged = true;
+        rec.isFlagged = true;
         statusLog[batchId].push("Flag the batch");
         emit RecordFlaged(batchId, timestamp);
     }

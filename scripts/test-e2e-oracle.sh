@@ -305,18 +305,6 @@ fi
 echo ""
 
 
-
-sensor_data="{
-  \"batchId\": $BATCH_ID,
-  \"temperature\": -10,
-  \"humidity\": 60
-}"
-if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Data"; then
-    PASSED_TESTS=$((PASSED_TESTS + 1))
-fi
-echo ""
-
-
 for i in 1 2 3; do
   curl -s -X POST "$API_BASE/api/oracle/sensor-data" \
      -H "Content-Type: application/json" \

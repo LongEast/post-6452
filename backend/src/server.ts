@@ -223,7 +223,7 @@ app.get("/api/lifecycle/batch/:batchId", async (req, res) => {
           minTemperature: record.minTemperature,
           maxHumidity: record.maxHumidity,
           minHumidity: record.minHumidity,
-          isFlaged: record.isFlaged,
+          isFlagged: record.isFlagged,
           metadataURI: record.metadataURI
         }
       });
@@ -706,7 +706,7 @@ app.get("/api/auditor/batch/:batchId/comprehensive", async (req, res) => {
         minTemperature: batchRecord.data.minTemperature,
         maxHumidity: batchRecord.data.maxHumidity,
         minHumidity: batchRecord.data.minHumidity,
-        isFlaged: batchRecord.data.isFlaged,
+        isFlagged: batchRecord.data.isFlagged,
         metadataURI: batchRecord.data.metadataURI
       },
       statusHistory: statusLog.success ? statusLog.data : [],
@@ -719,7 +719,7 @@ app.get("/api/auditor/batch/:batchId/comprehensive", async (req, res) => {
         humidityCompliance: sensorData.lastReading ? 
           (sensorData.lastReading.humidity >= parseInt(batchRecord.data.minHumidity) && 
            sensorData.lastReading.humidity <= parseInt(batchRecord.data.maxHumidity)) : null,
-        isFlagged: batchRecord.data.isFlaged,
+        isFlagged: batchRecord.data.isFlagged,
         statusCompleted: parseInt(batchRecord.data.status) >= 3 // Delivered or higher
       }
     };

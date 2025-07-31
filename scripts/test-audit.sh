@@ -68,7 +68,7 @@ if echo "$AUDIT_DATA" | grep -q '"success":true'; then
     echo "3. Audit data analysis:"
     
     BATCH_STATUS=$(echo "$AUDIT_DATA" | jq -r '.batchRecord.status // "unknown"')
-    IS_FLAGGED=$(echo "$AUDIT_DATA" | jq -r '.batchRecord.isFlaged // false')
+    IS_FLAGGED=$(echo "$AUDIT_DATA" | jq -r '.batchRecord.isFlagged // false')
     TEMP_COMPLIANCE=$(echo "$AUDIT_DATA" | jq -r '.complianceAnalysis.temperatureCompliance // "unknown"')
     HUMIDITY_COMPLIANCE=$(echo "$AUDIT_DATA" | jq -r '.complianceAnalysis.humidityCompliance // "unknown"')
     

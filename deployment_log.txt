@@ -1,7 +1,39 @@
-
-> comp6452-blockchain@1.0.0 deploy
-> ts-node backend/src/deployAll.ts deploy acc0 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1 0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0
-
+{
+  contracts: {
+    '@openzeppelin/contracts/access/AccessControl.sol': { AccessControl: [Object] },
+    '@openzeppelin/contracts/access/IAccessControl.sol': { IAccessControl: [Object] },
+    '@openzeppelin/contracts/utils/Context.sol': { Context: [Object] },
+    '@openzeppelin/contracts/utils/introspection/ERC165.sol': { ERC165: [Object] },
+    '@openzeppelin/contracts/utils/introspection/IERC165.sol': { IERC165: [Object] },
+    Auditor: { Auditor: [Object] },
+    CakeFactory: { CakeFactory: [Object] },
+    CakeLifecycleRegistry: { CakeLifecycleRegistry: [Object] },
+    'ICakeLifecycle.sol': { ICakeLifecycle: [Object] },
+    'IShipmentAlertSink.sol': { IShipmentAlertSink: [Object] },
+    RoleManager: { RoleManager: [Object] },
+    'RoleManager.sol': { RoleManager: [Object] },
+    SensorOracle: { SensorOracle: [Object] },
+    Shipper: { Shipper: [Object] },
+    Warehouse: { Warehouse: [Object] }
+  },
+  sources: {
+    '@openzeppelin/contracts/access/AccessControl.sol': { id: 0 },
+    '@openzeppelin/contracts/access/IAccessControl.sol': { id: 1 },
+    '@openzeppelin/contracts/utils/Context.sol': { id: 2 },
+    '@openzeppelin/contracts/utils/introspection/ERC165.sol': { id: 3 },
+    '@openzeppelin/contracts/utils/introspection/IERC165.sol': { id: 4 },
+    Auditor: { id: 5 },
+    CakeFactory: { id: 6 },
+    CakeLifecycleRegistry: { id: 7 },
+    'ICakeLifecycle.sol': { id: 8 },
+    'IShipmentAlertSink.sol': { id: 9 },
+    RoleManager: { id: 10 },
+    'RoleManager.sol': { id: 11 },
+    SensorOracle: { id: 12 },
+    Shipper: { id: 13 },
+    Warehouse: { id: 14 }
+  }
+}
 Writing:  @openzeppelin/contracts/access/AccessControl.json to build
 /home/junyi/6452/COMP6452-blockchain/build/@openzeppelin/contracts/access/AccessControl.json
 Writing:  @openzeppelin/contracts/access/IAccessControl.json to build
@@ -32,24 +64,35 @@ Writing:  Shipper.json to build
 /home/junyi/6452/COMP6452-blockchain/build/Shipper.json
 Writing:  Warehouse.json to build
 /home/junyi/6452/COMP6452-blockchain/build/Warehouse.json
-Deployed RoleManager → 0x6eD79Aa1c71FD7BdBC515EfdA3Bd4e26394435cC
-Deployed CakeLifecycleRegistry → 0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6
-Deployed CakeFactory → 0xFC628dd79137395F3C9744e33b1c5DE554D94882
-Deployed Shipper → 0x5f8e26fAcC23FA4cbd87b8d9Dbbd33D5047abDE1
-Deployed Warehouse → 0x21a59654176f2689d12E828B77a783072CD26680
-Deployed SensorOracle → 0xD86C8F0327494034F60e25074420BcCF560D5610
-SensorOracle.setShipment(0x5f8e26fAcC23FA4cbd87b8d9Dbbd33D5047abDE1)
-Deployed Auditor → 0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D
+Deployed RoleManager → 0x5FbDB2315678afecb367f032d93F642f64180aa3
+Deployed CakeLifecycleRegistry → 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+Deployed CakeFactory → 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+BAKER_ROLE hash: 0xa1f9a7b0b3cf5756102af05a4cb1d9fd1fabbc545b2d0c5346fec85203342f9c
+Admin has DEFAULT_ADMIN_ROLE: false
+Granted BAKER_ROLE to CakeFactory (0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0) in CakeLifecycleRegistry
+Deployed Shipper → 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+SHIPPER_ROLE hash: 0x4e362b67b88d3e2d34d2ca4e36ebff0c7ab75c9d4175270d06ec05e45f857047
+Granted SHIPPER_ROLE to Shipper (0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9) in CakeLifecycleRegistry
+Deployed Warehouse → 0x0165878A594ca255338adfa4d48449f69242Eb8F
+WAREHOUSE_ROLE hash: 0x86e5d4f80d7f8b1b61ae652dd7f1b1f5e3852b51f11f567750f78326759b3afd
+Granted WAREHOUSE_ROLE to Warehouse (0x0165878A594ca255338adfa4d48449f69242Eb8F) in CakeLifecycleRegistry
+Deployed SensorOracle → 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+ORACLE_ROLE hash: 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
+Granted ORACLE_ROLE to SensorOracle (0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6) in CakeLifecycleRegistry
+SensorOracle.setShipment(0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9)
+Deployed Auditor → 0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e
+AUDITOR_ROLE hash: 0x59a1c48e5837ad7a7f3dcedcbe129bf3249ec4fbf651fd4f5e2600ead39fe2f5
+Granted AUDITOR_ROLE to Auditor (0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e) in CakeLifecycleRegistry
 
 Deployment summary:
-Admin: 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
-Sensor: 0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0
-SensorEOA: 0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0
-ShipperEOA: 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
-RoleManager: 0x6eD79Aa1c71FD7BdBC515EfdA3Bd4e26394435cC
-CakeLifecycleRegistry: 0xb09bCc172050fBd4562da8b229Cf3E45Dc3045A6
-CakeFactory: 0xFC628dd79137395F3C9744e33b1c5DE554D94882
-Shipper: 0x5f8e26fAcC23FA4cbd87b8d9Dbbd33D5047abDE1
-Warehouse: 0x21a59654176f2689d12E828B77a783072CD26680
-SensorOracle: 0xD86C8F0327494034F60e25074420BcCF560D5610
-Auditor: 0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D
+Admin: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Sensor: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+SensorEOA: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+ShipperEOA: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+RoleManager: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+CakeLifecycleRegistry: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+CakeFactory: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+Shipper: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
+Warehouse: 0x0165878A594ca255338adfa4d48449f69242Eb8F
+SensorOracle: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6
+Auditor: 0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e

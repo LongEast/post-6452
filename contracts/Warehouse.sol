@@ -64,7 +64,7 @@ contract Warehouse is AccessControl {
 
         bool doCheck = false;
 
-        if (rec.isFlaged) {
+        if (rec.isFlagged) {
             doCheck = true;
             emit QualityFlagged(batchId, msg.sender, block.timestamp);
         } else {
