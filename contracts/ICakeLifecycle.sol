@@ -19,8 +19,8 @@ interface ICakeLifecycle {
         address warehouse;
         uint256 createdAt;
         Status status;
-        uint256 maxTemperature;
-        uint256 minTemperature;
+        int256 maxTemperature;
+        int256 minTemperature;
         uint256 maxHumidity;
         uint256 minHumidity;
         bool isFlaged;
@@ -29,8 +29,8 @@ interface ICakeLifecycle {
     
      function createRecord(
         uint256 batchId,
-        uint256 maxTemperature,
-        uint256 minTemperature,
+        int256 maxTemperature,
+        int256 minTemperature,
         uint256 maxHumidity,
         uint256 minHumidity,
         string calldata metadataURI
