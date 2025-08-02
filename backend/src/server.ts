@@ -484,7 +484,7 @@ app.post("/api/oracle/set-shipment", async (req, res) => {
 
 app.post("/api/oracle/sensor-data", async (req, res) => {
   try {
-    const { batchId, timestamp, temperature, humidity } = req.body;
+    const { batchId, temperature, humidity } = req.body;
     if (!batchId || temperature === undefined || humidity === undefined) {
       return res.status(400).json({ error: "Missing required sensor data" });
     }
@@ -520,7 +520,7 @@ app.post("/api/oracle/sensor-data", async (req, res) => {
     /* ---------- only bad data reaches chain ---------- */
     const oracle  = getContract("SensorOracle");
     const result  = await sendTransaction(
-      oracle.methods.submitSensorData(batchId, timestamp, temperature, humidity)
+      oracle.methods.submitSensorData(batchId, temperature, humidity)
     );
 
     return res.json({
