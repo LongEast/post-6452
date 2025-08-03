@@ -39,11 +39,19 @@ contract Shipper is AccessControl {
 
     /// @param shipper the shipper (gets SHIPPER_ROLE)
     /// @param lifecycleAddress the deployed CakeLifecycleRegistry address
-    constructor(address shipper, address lifecycleAddress) {
+    constructor(address admin, address shipper, address lifecycleAddress) {
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(SHIPPER_ROLE, shipper);
         lifecycle = ICakeLifecycle(lifecycleAddress);
     }
     
+    function setOracle(address oracleAdd)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _grantRole(ORACLE_ROLE, oracleAdd);
+    }
+
     /// @notice record the handoff to next actor
     function handOffLog(uint256 batchId, address fromActor, address toActor, int256 longitude, int256 latitude, bytes32 snapshotHash) 
         external
@@ -66,25 +74,14 @@ contract Shipper is AccessControl {
         external 
         onlyRole(ORACLE_ROLE)
     {   
-        checkBatch(batchId);
-        uint256 interval = timestamp - alertLogs[batchId];
-        if (interval >= 295 && interval <= 305) {
-            alertCount[batchId]++;
-        }
-        
-        else {
-            alertCount[batchId] = 1;
-        }
+        alertCount[batchId]++;
 
-        alertLogs[batchId] = timestamp;
-
-
-        if (alertCount[batchId] == 3 && hasFlagged[batchId] == false) {
+        if (alertCount[batchId] == 1 && hasFlagged[batchId] == false) {
             lifecycle.flagBatch(batchId, timestamp);
             hasFlagged[batchId] = true;
         }
     }
-
+    
     /// @notice record arrival to warehouse
     function deliveredToWarehouse(uint256 batchId, address warehouse)
         external

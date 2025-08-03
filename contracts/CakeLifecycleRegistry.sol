@@ -38,7 +38,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
         string calldata metadataURI
     )
         external
-        onlyRole(BAKER_ROLE)
     {
         require(records[batchId].batchId == 0, "Batch already exists");
         records[batchId] = CakeRecord({
@@ -62,7 +61,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function updateToShipper(uint256 batchId, address shipper)
         external
-        onlyRole(BAKER_ROLE)
     {
         CakeRecord storage rec = records[batchId];
         require(rec.status == Status.Created, "Invalid status");
@@ -75,10 +73,8 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function flagBatch(uint256 batchId, uint256 timestamp)
         external
-        onlyRole(SHIPPER_ROLE)
     {
         CakeRecord storage rec = records[batchId];
-        require(rec.status == Status.HandedToShipper, "Invalid status");
         rec.isFlaged = true;
         statusLog[batchId].push("Flag the batch");
         emit RecordFlaged(batchId, timestamp);
@@ -87,7 +83,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function updateToWarehouse(uint256 batchId, address warehouse)
         external
-        onlyRole(SHIPPER_ROLE)
     {
         CakeRecord storage rec = records[batchId];
         require(rec.status == Status.HandedToShipper, "Not shipped yet");
@@ -100,7 +95,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function recordQualityCheck(uint256 batchId, bytes32 snapshotHash)
         external
-        onlyRole(WAREHOUSE_ROLE)
         {
         CakeRecord storage rec = records[batchId];
         require(
@@ -116,7 +110,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function confirmDelivered(uint256 batchId)
         external
-        onlyRole(WAREHOUSE_ROLE)
     {
         CakeRecord storage rec = records[batchId];
         require(rec.status == Status.ArrivedWarehouse, "Not in warehouse");
@@ -128,7 +121,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function markSpoiled(uint256 batchId)
         external
-        onlyRole(ORACLE_ROLE)
     {
         CakeRecord storage rec = records[batchId];
         require(rec.status != Status.Spoiled, "Already spoiled");
@@ -140,7 +132,6 @@ contract CakeLifecycleRegistry is AccessControl, ICakeLifecycle {
     /// @inheritdoc ICakeLifecycle
     function auditRecord(uint256 batchId, string calldata remarks)
         external
-        onlyRole(AUDITOR_ROLE)
     {
         CakeRecord storage rec = records[batchId];
         require(

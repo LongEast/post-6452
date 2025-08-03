@@ -57,7 +57,7 @@ const deployPlan: PlanItem[] = [
   },
   /* 4) business contracts that depend on the registry */
   { name: "Shipper",   
-    ctor: ["$ShipperEOA", "$CakeLifecycleRegistry"],
+    ctor: ["$Admin", "$ShipperEOA", "$CakeLifecycleRegistry"],
     postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
       const registryAddr = addr["$CakeLifecycleRegistry"];
       const shipperAddr = addr["$Shipper"];
