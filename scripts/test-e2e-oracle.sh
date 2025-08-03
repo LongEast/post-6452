@@ -318,7 +318,7 @@ batch_data="{
   \"minTemperature\": -5,
   \"maxHumidity\": 50,
   \"minHumidity\": 20,
-  \"metadataURI\": \"ipfs://e2e-test-$1002\"
+  \"metadataURI\": \"ipfs://e2e-test-1002\"
 }"
 if test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
@@ -336,6 +336,8 @@ if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sen
 fi
 echo ""
 
+sleep 2
+
 # 2
 sensor_data="{
   \"batchId\": 1002,
@@ -346,6 +348,8 @@ if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sen
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""
+
+sleep 2
 
 # 3
 sensor_data="{
@@ -359,7 +363,7 @@ fi
 echo ""
 
 # Should flag
-if test_endpoint "GET" "/api/lifecycle/batch/$BATCH_ID" "" 200 "Check Batch Flag"; then
+if test_endpoint "GET" "/api/lifecycle/batch/1002" "" 200 "Check Batch Flag"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""
@@ -394,6 +398,8 @@ if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sen
 fi
 echo ""
 
+sleep 2
+
 # 2
 sensor_data="{
   \"batchId\": 1004,
@@ -405,18 +411,20 @@ if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sen
 fi
 echo ""
 
+sleep 2
+
 # 3
 sensor_data="{
   \"batchId\": 1004,
   \"temperature\": 14,
   \"humidity\": 46
 }"
-if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Valid! Data 3"; then
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Valid Data 3"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""
 
-# Should flag
+# Should not flag
 if test_endpoint "GET" "/api/lifecycle/batch/1004" "" 200 "Check Batch No Flag"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
