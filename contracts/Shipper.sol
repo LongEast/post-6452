@@ -76,7 +76,7 @@ contract Shipper is AccessControl {
     {   
         alertCount[batchId]++;
 
-        if (alertCount[batchId] == 1 && hasFlagged[batchId] == false) {
+        if (alertCount[batchId] == 3 && hasFlagged[batchId] == false) {
             lifecycle.flagBatch(batchId, timestamp);
             hasFlagged[batchId] = true;
         }

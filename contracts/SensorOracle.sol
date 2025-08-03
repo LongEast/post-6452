@@ -3,6 +3,7 @@ pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./IShipmentAlertSink.sol";
+import "./ICakeLifecycle.sol";
 
 
 // This contract is not abstract. All required functions from AccessControl are implemented or inherited.
@@ -10,13 +11,7 @@ import "./IShipmentAlertSink.sol";
 contract SensorOracle is AccessControl {
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
     IShipmentAlertSink public shipment;
-
-
-    int256 public maxTemp      = 20;   // °C
-    int256 public minTemp      = -7;
-    int256 public MAX_HUMIDITY = 50;   // %
-    int256 public MIN_HUMIDITY = 20;
-
+    ICakeLifecycle public lifecycle;
 
     struct SensorReading {
         uint256 timestamp;
@@ -46,11 +41,14 @@ contract SensorOracle is AccessControl {
 
     /// @param admin       gets DEFAULT_ADMIN_ROLE (can add/remove oracles)
     /// @param sensorAddr  gets ORACLE_ROLE — only this address can call submitSensorData
-    constructor(address admin, address sensorAddr) {
+    /// @param lifecycleAddress the deployed CakeLifecycleRegistry address
+    constructor(address admin, address sensorAddr, address lifecycleAddress) {
         // grant admin the default‐admin role
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         // grant the sensorAddr the ORACLE_ROLE
         _grantRole(ORACLE_ROLE, sensorAddr);
+        lifecycle = ICakeLifecycle(lifecycleAddress);
+
     }
 
     function setShipment(address shipmentAddr)
@@ -81,10 +79,12 @@ contract SensorOracle is AccessControl {
         string memory reason = "";
         bool violated;
 
-        if (temperature > maxTemp)      { violated = true; reason = "TEMP_HIGH"; }
-        else if (temperature < minTemp) { violated = true; reason = "TEMP_LOW"; }
-        else if (humidity > MAX_HUMIDITY){ violated = true; reason = "HUM_HIGH"; }
-        else if (humidity < MIN_HUMIDITY){ violated = true; reason = "HUM_LOW"; }
+        ICakeLifecycle.CakeRecord memory rec = lifecycle.getRecord(batchId);
+
+        if (temperature > rec.maxTemperature)      { violated = true; reason = "TEMP_HIGH"; }
+        else if (temperature < rec.minTemperature) { violated = true; reason = "TEMP_LOW"; }
+        else if (humidity > int256(rec.maxHumidity)){ violated = true; reason = "HUM_HIGH"; }
+        else if (humidity < int256(rec.minHumidity)){ violated = true; reason = "HUM_LOW"; }
 
         if (violated) {
             emit ThresholdAlert(batchId, timestamp, reason);
