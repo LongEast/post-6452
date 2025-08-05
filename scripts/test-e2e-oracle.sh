@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 # Configuration
 API_BASE="http://localhost:3000"
 GANACHE_PORT=8546
-API_PORT=3000
+API_PORT=3500
 
 # PIDs to track background processes
 GANACHE_PID=""
@@ -309,18 +309,123 @@ oracle_body="{\"oracleAddr\":\"$ORACLE_ADDRESS\"}"
 test_endpoint "POST" "/api/shipper/set-oracle" "$oracle_body" 200 "Set Oracle Address"
 
 
+
+# --------------------  Should flag -----------------------------
+
+batch_data="{
+  \"batchId\": 1002,
+  \"maxTemperature\": 20,
+  \"minTemperature\": -5,
+  \"maxHumidity\": 50,
+  \"minHumidity\": 20,
+  \"metadataURI\": \"ipfs://e2e-test-1002\"
+}"
+if test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# 1
 sensor_data="{
-  \"batchId\": $BATCH_ID,
+  \"batchId\": 1002,
   \"temperature\": -10,
   \"humidity\": 60
 }"
-if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Data"; then
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 1"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 2
+sensor_data="{
+  \"batchId\": 1002,
+  \"temperature\": -6,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 2"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 3
+sensor_data="{
+  \"batchId\": 1002,
+  \"temperature\": -10,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 3"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# Should flag
+if test_endpoint "GET" "/api/lifecycle/batch/1002" "" 200 "Check Batch Flag"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""
 
 
-if test_endpoint "GET" "/api/lifecycle/batch/$BATCH_ID" "" 200 "Check Batch Flag"; then
+
+
+# --------------------  Should not flag -----------------------------
+
+# Create Batch
+batch_data="{
+  \"batchId\": 1004,
+  \"maxTemperature\": 20,
+  \"minTemperature\": -5,
+  \"maxHumidity\": 50,
+  \"minHumidity\": 20,
+  \"metadataURI\": \"ipfs://e2e-test-1004\"
+}"
+if test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# 1
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": -10,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 1"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 2
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": -6,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 2"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 3
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": 14,
+  \"humidity\": 46
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Valid Data 3"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# Should not flag
+if test_endpoint "GET" "/api/lifecycle/batch/1004" "" 200 "Check Batch No Flag"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""

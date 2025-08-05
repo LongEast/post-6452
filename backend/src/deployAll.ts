@@ -103,7 +103,7 @@ const deployPlan: PlanItem[] = [
 
   /* 5) SensorOracle + wiring to the Shipper */
   { name: "SensorOracle",
-    ctor:  ["$Admin", "$SensorEOA"],
+    ctor:  ["$Admin", "$SensorEOA", "$CakeLifecycleRegistry"],
     after: [["SensorOracle", "setShipment", ["$Shipper"]]],
     postDeploy: async (web3: Web3, addr: Record<string, string>, acct: any, out: any) => {
       const registryAddr = addr["$CakeLifecycleRegistry"];
