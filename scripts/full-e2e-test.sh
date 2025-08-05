@@ -107,10 +107,7 @@ wait_for_service() {
 }
 
 pretty_json_lines () {
-  echo "$1" | jq -r '
-    paths(scalars) as $p
-    | ($p | join(".")) + ": " + (getpath($p)|tostring)
-  '
+  echo "$1" | jq
 }
 
 # Function to test an endpoint
