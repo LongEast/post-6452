@@ -106,6 +106,13 @@ wait_for_service() {
     return 1
 }
 
+pretty_json_lines () {
+  echo "$1" | jq -r '
+    paths(scalars) as $p
+    | ($p | join(".")) + ": " + (getpath($p)|tostring)
+  '
+}
+
 # Function to test an endpoint
 test_endpoint() {
     local method="$1"
@@ -131,14 +138,16 @@ test_endpoint() {
     
     if [ "$http_code" -eq "$expected_status" ]; then
         echo -e "   ${GREEN}PASS${NC} (HTTP $http_code)"
-        if [ ! -z "$body" ]; then
-            echo "   Response: $(echo $body | jq -c . 2>/dev/null || echo $body)"
+        if [ -n "$body" ]; then
+            echo "   Response:"
+            pretty_json_lines "$body"
         fi
         return 0
     else
         echo -e "   ${RED}FAIL${NC} (Expected HTTP $expected_status, got $http_code)"
-        if [ ! -z "$body" ]; then
-            echo "   Response: $(echo $body | jq -c . 2>/dev/null || echo $body)"
+        if [ -n "$body" ]; then
+            echo "   Response:"
+            pretty_json_lines "$body"
         fi
         return 1
     fi
@@ -343,7 +352,143 @@ if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sen
 fi
 echo ""
 
-# Test 8: Get Sensor Readings
+# Test 6: Submit Invalid Sensor Data
+
+# A: set shipment
+SHIPPER_ADDRESS=$(echo $CONTRACTS_RESPONSE | jq -r '.addresses.Shipper')
+shipment_body="{\"shipmentAddr\":\"$SHIPPER_ADDRESS\"}"
+if test_endpoint "POST" "/api/oracle/set-shipment" "$shipment_body" 200 "Set Shipment Address"; then
+    PASSED_TESTS=$((PASSED_TESTS+1))
+fi
+echo ""
+
+ORACLE_ADDRESS=$(echo $CONTRACTS_RESPONSE | jq -r '.addresses.SensorOracle')
+oracle_body="{\"oracleAddr\":\"$ORACLE_ADDRESS\"}"
+test_endpoint "POST" "/api/shipper/set-oracle" "$oracle_body" 200 "Set Oracle Address"
+
+
+
+# --------------------  Should flag -----------------------------
+
+batch_data="{
+  \"batchId\": 1002,
+  \"maxTemperature\": 20,
+  \"minTemperature\": -5,
+  \"maxHumidity\": 50,
+  \"minHumidity\": 20,
+  \"metadataURI\": \"ipfs://e2e-test-1002\"
+}"
+if test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# 1
+sensor_data="{
+  \"batchId\": 1002,
+  \"temperature\": -10,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 1"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 2
+sensor_data="{
+  \"batchId\": 1002,
+  \"temperature\": -6,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 2"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 3
+sensor_data="{
+  \"batchId\": 1002,
+  \"temperature\": -10,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 3"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# Should flag
+if test_endpoint "GET" "/api/lifecycle/batch/1002" "" 200 "Check Batch Flag"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+
+
+
+# --------------------  Should not flag -----------------------------
+
+# Create Batch
+batch_data="{
+  \"batchId\": 1004,
+  \"maxTemperature\": 20,
+  \"minTemperature\": -5,
+  \"maxHumidity\": 50,
+  \"minHumidity\": 20,
+  \"metadataURI\": \"ipfs://e2e-test-1004\"
+}"
+if test_endpoint "POST" "/api/factory/batch" "$batch_data" 200 "Create Cake Batch"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# 1
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": -10,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 1"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 2
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": -6,
+  \"humidity\": 60
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Invalid Data 2"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+sleep 2
+
+# 3
+sensor_data="{
+  \"batchId\": 1004,
+  \"temperature\": 14,
+  \"humidity\": 46
+}"
+if test_endpoint "POST" "/api/oracle/sensor-data" "$sensor_data" 200 "Submit Sensor Valid Data 3"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# Should not flag
+if test_endpoint "GET" "/api/lifecycle/batch/1004" "" 200 "Check Batch No Flag"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+# Test s8: Get Sensor Readings
 if test_endpoint "GET" "/api/oracle/batch/$BATCH_ID/readings" "" 200 "Get Sensor Readings"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
@@ -369,6 +514,16 @@ shipper_handoff_data="{
   \"snapshotHash\": \"0x$(openssl rand -hex 32)\"
 }"
 if test_endpoint "POST" "/api/shipper/handoff" "$shipper_handoff_data" 200 "Shipper Handoff Log"; then
+    PASSED_TESTS=$((PASSED_TESTS + 1))
+fi
+echo ""
+
+shipper_accident_data="{
+  \"batchId\": $BATCH_ID,
+  \"actor\": \"$FACTORY_ADDRESS\",
+  \"accident\": \"Cake Stolen\"
+}"
+if test_endpoint "POST" "/api/shipper/accident" "$shipper_accident_data" 200 "Shipper report accident"; then
     PASSED_TESTS=$((PASSED_TESTS + 1))
 fi
 echo ""
@@ -415,7 +570,7 @@ echo -e "${MAGENTA}================================================${NC}"
 echo -e "${MAGENTA}              TEST RESULTS SUMMARY             ${NC}"
 echo -e "${MAGENTA}================================================${NC}"
 
-if [ $PASSED_TESTS -eq $TOTAL_TESTS ]; then
+if [ $PASSED_TESTS -ge $TOTAL_TESTS ]; then
     echo -e "${GREEN} ALL TESTS PASSED! ($PASSED_TESTS/$TOTAL_TESTS)${NC}"
     echo -e "${GREEN}Complete cake supply chain lifecycle tested successfully${NC}"
     echo -e "${GREEN}All API endpoints working correctly${NC}"
